@@ -48,3 +48,4 @@ modules/upload/attachments/thumbs/*.gif
 
 # All .log files
 *.log
+.rvmrc
