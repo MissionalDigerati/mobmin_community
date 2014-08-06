@@ -3,6 +3,11 @@
 
 This is the repository for the #MobMin Twitter hashtag community portal.  #MobMin is a collection of resources focusing in the use of mobile technology for fulfilling the Great Commission.  Find out more at the [Mobile Ministry Forum](http://mobileministryforum.org) main website.  This community portal is built on the [Pligg](http://pligg.com) content management system.
 
+Production Notes
+----------------
+
+When setting this up for production,  your document root should be the **webroot** directory.  Code above that directory should be inaccessible!
+
 Development Notes
 -----------------
 
