@@ -46,4 +46,16 @@ class Link
     {
         $this->db = $db;
     }
+    /**
+     * Save the link into the database
+     *
+     * @param array $link an array of the link data to save
+     * @return void
+     * @access public
+     * @author Johnathan Pulos
+     **/
+    public function save($link)
+    {
+        
+    }
 }

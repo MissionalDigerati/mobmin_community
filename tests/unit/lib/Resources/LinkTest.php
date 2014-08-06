@@ -37,6 +37,30 @@ class LinkTest extends \PHPUnit_Framework_TestCase
      */
     private $db;
     /**
+     * A factory for creating a link
+     *
+     * @var array
+     * @access private
+     **/
+    private $linkFactory = array(
+        'link_author'           =>  'A Link Author',
+        'link_status'           =>  'published',
+        'link_randkey'          =>  0,
+        'link_votes'            =>  1,
+        'link_karma'            =>  1,
+        'link_modified'         =>  '',
+        'link_date'             =>  '',
+        'link_published_date'   =>  '',
+        'link_category'         =>  0,
+        'link_url'              =>  'http://www.google.com',
+        'link_url_title'        =>  'Google.com',
+        'link_title'            =>  'Google',
+        'link_title_url'        =>  'www-google-com',
+        'link_content'          =>  'A great place to search for the best.',
+        'link_summary'          =>  'I really love this place!',
+        'link_tags'             =>  'google, rocks'
+    );
+    /**
      * Setup the test
      *
      * @return void
@@ -45,8 +69,28 @@ class LinkTest extends \PHPUnit_Framework_TestCase
      **/
     public function setUp()
     {
+        $this->linkFactory['link_randkey'] = rand(10000,10000000);
+        $today = date('Y-m-d H:i:s',time());
+        $this->linkFactory['link_modified'] = $today;
+        $this->linkFactory['link_date'] = $today;
+        $this->linkFactory['link_published_date'] = $today;
+
         $pdoDb = \PHPToolbox\PDODatabase\PDODatabaseConnect::getInstance();
         $pdoDb->setDatabaseSettings(new \support\DatabaseSettings);
         $this->db = $pdoDb->getDatabaseInstance();
+    }
+    /**
+     * test that save() adds the record to the database
+     *
+     * @return void
+     * @access public
+     * @author Johnathan Pulos
+     **/
+    public function testSaveShouldSaveALinkIntoTheDatabase()
+    {
+        $link = $this->linkFactory;
+        $link['link_title'] = 'testSaveShouldSaveALinkIntoTheDatabase';
+        $linkResource = new \Resources\Link($this->db);
+        $linkResource->save($link);
     }
 }

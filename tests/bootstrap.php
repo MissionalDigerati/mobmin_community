@@ -21,6 +21,7 @@
  * 
  */
 $DS = DIRECTORY_SEPARATOR;
+$libDirectory = __DIR__ . $DS . ".." . $DS . "lib" . $DS;
 $vendorDirectory = __DIR__ . $DS . ".." . $DS . "vendor" . $DS;
 $PHPToolboxDirectory = $vendorDirectory . "PHPToolbox" . $DS . "src" . $DS;
 /**
@@ -48,6 +49,12 @@ $loader->add("support\DatabaseSettings", __DIR__);
  * @author Johnathan Pulos
  */
 $loader->add("PHPToolbox\PDODatabase\PDODatabaseConnect", $PHPToolboxDirectory);
+/**
+ * Autoload the lib classes
+ *
+ * @author Johnathan Pulos
+ */
+$loader->add("Resources\Link", $libDirectory);
 /**
  * autoload models & test files
  *
