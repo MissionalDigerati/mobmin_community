@@ -56,6 +56,5 @@ class Link
      **/
     public function save($link)
     {
-        
     }
 }

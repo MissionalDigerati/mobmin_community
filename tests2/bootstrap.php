@@ -21,8 +21,8 @@
  * 
  */
 $DS = DIRECTORY_SEPARATOR;
-$libDirectory = __DIR__ . $DS . ".." . $DS . "lib" . $DS;
-$vendorDirectory = __DIR__ . $DS . ".." . $DS . "vendor" . $DS;
+$libDirectory = __DIR__ . $DS . ".." . $DS . "Lib" . $DS;
+$vendorDirectory = __DIR__ . $DS . ".." . $DS . "Vendor" . $DS;
 $PHPToolboxDirectory = $vendorDirectory . "PHPToolbox" . $DS . "src" . $DS;
 /**
  * Load up the Aura
@@ -42,7 +42,7 @@ $loader->setMode(\Aura\Autoload\Loader::MODE_SILENT);
  *
  * @author Johnathan Pulos
  */
-$loader->add("support\DatabaseSettings", __DIR__);
+$loader->add("Support\DatabaseSettings", __DIR__);
 /**
  * Autoload the PDO Database Class
  *
