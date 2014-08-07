@@ -95,4 +95,26 @@ class ModelTest extends \PHPUnit_Framework_TestCase
         $actual = $method->invoke($model);
         $this->assertEquals($expected, $actual);
     }
+    /**
+     * setTablePrefix() should set the class attribute tablePrefix
+     *
+     * @return void
+     * @access public
+     * @author Johnathan Pulos
+     **/
+    public function testSetTablePrefixShouldSetTheTablePrefix() {
+        $expected = 'my_unique_table_prefix.';
+        $model = new \Resources\Model($this->db);
+        $reflectionOfModel = new \ReflectionClass('\Resources\Model');
+
+        $method = $reflectionOfModel->getMethod('setTablePrefix');
+        $method->setAccessible(true);
+        $method->invoke($model, $expected);
+
+        $tablePrefix = $reflectionOfModel->getProperty('tablePrefix');
+        $tablePrefix->setAccessible(true);
+        $actual = $tablePrefix->getValue($model);
+
+        $this->assertEquals($expected, $actual);
+    }
 }
