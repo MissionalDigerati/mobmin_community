@@ -28,6 +28,27 @@
 class Model
 {
     /**
+     * The table name to query
+     *
+     * @var string
+     * @access protected
+     **/
+    protected $tableName = '';
+    /**
+     * The primary key of the table
+     *
+     * @var string
+     * @access protected
+     **/
+    protected $primaryKey = 'id';
+    /**
+     * An array of whitelisted attributes
+     *
+     * @var array
+     * @access protected
+     **/
+    protected $accessibleAttributes = array();
+    /**
      * The table prefix for the links table
      *
      * @var string
@@ -81,5 +102,41 @@ class Model
         } else {
             throw new \InvalidArgumentException('$db must be of the class \PDO.');
         }
+    }
+    /**
+     * Generates the insert SQL query based on the set $accessibleAttributes class variable
+     *
+     * @return string The final Query statement
+     * @access protected
+     * @author Johnathan Pulos
+     **/
+    protected function getInsertQuery()
+    {
+        $query = "INSERT INTO " . $this->tablePrefix . $this->tableName . "(" .
+            implode(', ', $this->accessibleAttributes) . ") VALUES(:" . implode(', :', $this->accessibleAttributes) . ")";
+        return $query;
+    }
+    /**
+     * Bind the values to the POD statement
+     *
+     * @param PDOStatement $statement The statement to bind values to
+     * @param array $data The data to save regarding the Resource
+     * @param string $queryType (insert, update)
+     * @return \PDOStatement The statement object
+     * @author Johnathan Pulos
+     **/
+    protected function bindValues($statement, $data, $queryType = 'insert')
+    {
+        foreach ($this->accessibleAttributes as $attribute) {
+            if (array_key_exists($attribute, $data)) {
+                $value = $data[$attribute];
+            } else {
+                if (strtolower($queryType) == 'insert') {
+                    $value = '';
+                }
+            }
+            $statement->bindValue(":" . $attribute, $value);
+        }
+        return $statement;
     }
 }
