@@ -44,6 +44,20 @@ class ModelTest extends \PHPUnit_Framework_TestCase
      **/
     private $dbTablePrefix;
     /**
+     * setUp the Test class
+     *
+     * @return void
+     * @author Johnathan Pulos
+     **/
+    public function setUp()
+    {
+        $pdoDb = \PHPToolbox\PDODatabase\PDODatabaseConnect::getInstance();
+        $dbSettings = new \Support\DatabaseSettings();
+        $this->dbTablePrefix = $dbSettings->default['table_prefix'];
+        $pdoDb->setDatabaseSettings($dbSettings);
+        $this->db = $pdoDb->getDatabaseInstance();
+    }
+    /**
      * __construct should throw an error if passed a non PDO object for a database
      *
      * @return void
@@ -54,5 +68,31 @@ class ModelTest extends \PHPUnit_Framework_TestCase
     public function testConstructThrowsErrorIfGivenANonPDOObject()
     {
         $model = new \Resources\Model('Not a PDO object');
+    }
+    /**
+     * getInsertQuery() should generate the correct query statement
+     *
+     * @return void
+     * @access public
+     * @author Johnathan Pulos
+     **/
+    public function testGetInsertQueryShouldGenerateTheCorrectQuery()
+    {
+        $expected = "INSERT INTO " . $this->dbTablePrefix . "users(name) VALUES(:name)";
+        $model = new \Resources\Model($this->db);
+        $reflectionOfModel = new \ReflectionClass('\Resources\Model');
+        
+        $accessibleAttributes = $reflectionOfModel->getProperty('accessibleAttributes');
+        $accessibleAttributes->setAccessible(true);
+        $accessibleAttributes->setValue($model, array('name'));
+
+        $tableName = $reflectionOfModel->getProperty('tableName');
+        $tableName->setAccessible(true);
+        $tableName->setValue($model, 'users');
+
+        $method = $reflectionOfModel->getMethod('getInsertQuery');
+        $method->setAccessible(true);
+        $actual = $method->invoke($model);
+        $this->assertEquals($expected, $actual);
     }
 }
