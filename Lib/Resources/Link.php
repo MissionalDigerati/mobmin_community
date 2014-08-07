@@ -113,7 +113,7 @@ class Link extends Model
      *
      * @param string $content The current content for the link
      * @return string The truncated summary
-     * @access public
+     * @access protected
      * @author Johnathan Pulos
      **/
     protected function createSummary($content)
