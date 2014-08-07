@@ -69,15 +69,55 @@ class Link
         }
     }
     /**
-     * Save the link into the database
+     * Insert/Update the link in the database.  Pass an id to update.
      *
-     * @param array $link an array of the link data to save
-     * @return void
+     * @param array $data an array of the link data to save
+     * @param integer $id the Link.link_id of the record to update
+     * @return boolean Did it save the data?
      * @access public
      * @author Johnathan Pulos
      **/
-    public function save($link)
+    public function save($data, $id = null)
     {
+        if (is_null($id)) {
+            return $this->insertRecord($data);
+        }
+    }
+    /**
+     * Insert a new Link Resource
+     *
+     * @param array $data an array of the link data to save
+     * @return boolean Did it save?
+     * @author Johnathan Pulos
+     **/
+    protected function insertRecord($data)
+    {
+        $stmt = $this->db->prepare(
+            "INSERT INTO " . $this->tablePrefix . "links " .
+            "(link_author, link_status, link_randkey, link_votes, link_karma, link_modified, link_date, " .
+            "link_published_date, link_category, link_url, link_url_title, link_title, link_title_url, link_content, " .
+            "link_summary, link_tags) " .
+            "VALUES(:link_author, :link_status, :link_randkey, :link_votes, :link_karma, :link_modified, :link_date, " .
+            ":link_published_date, :link_category, :link_url, :link_url_title, :link_title, :link_title_url, " .
+            ":link_content, :link_summary, :link_tags)"
+        );
+        $stmt->bindValue(':link_author', $data['link_author']);
+        $stmt->bindValue(':link_status', $data['link_status']);
+        $stmt->bindValue(':link_randkey', $data['link_randkey']);
+        $stmt->bindValue(':link_votes', $data['link_votes']);
+        $stmt->bindValue(':link_karma', $data['link_karma']);
+        $stmt->bindValue(':link_modified', $data['link_modified']);
+        $stmt->bindValue(':link_date', $data['link_date']);
+        $stmt->bindValue(':link_published_date', $data['link_published_date']);
+        $stmt->bindValue(':link_category', $data['link_category']);
+        $stmt->bindValue(':link_url', $data['link_url']);
+        $stmt->bindValue(':link_url_title', $data['link_url_title']);
+        $stmt->bindValue(':link_title', $data['link_title']);
+        $stmt->bindValue(':link_title_url', $data['link_title_url']);
+        $stmt->bindValue(':link_content', $data['link_content']);
+        $stmt->bindValue(':link_summary', $data['link_summary']);
+        $stmt->bindValue(':link_tags', $data['link_tags']);
+        return $stmt->execute();
     }
 
 }

@@ -50,7 +50,7 @@ class LinkTest extends \PHPUnit_Framework_TestCase
      * @access private
      **/
     private $linkFactory = array(
-        'link_author'           =>  'A Link Author',
+        'link_author'           =>  1,
         'link_status'           =>  'published',
         'link_randkey'          =>  0,
         'link_votes'            =>  1,
@@ -89,6 +89,17 @@ class LinkTest extends \PHPUnit_Framework_TestCase
         $this->db = $pdoDb->getDatabaseInstance();
     }
     /**
+     * tearDown for each test
+     *
+     * @return void
+     * @access public
+     * @author Johnathan Pulos
+     **/
+    public function tearDown()
+    {
+        $this->db->query("DELETE FROM " . $this->dbTablePrefix . "links");
+    }
+    /**
      * setDatabaseObject should throw an error on non PDO objects
      *
      * @return void
@@ -110,10 +121,18 @@ class LinkTest extends \PHPUnit_Framework_TestCase
      **/
     public function testSaveShouldSaveALinkIntoTheDatabase()
     {
-        $link = $this->linkFactory;
-        $link['link_title'] = 'testSaveShouldSaveALinkIntoTheDatabase';
+        $expected = $this->linkFactory;
+        $expected['link_url_title'] = 'testSaveShouldSaveALinkIntoTheDatabase.com';
+        $expected['link_title'] = 'testSaveShouldSaveALinkIntoTheDatabase';
+        $expected['link_url'] = 'http://www.yahoo.com';
         $linkResource = $this->setUpLinkResource();
-        $linkResource->save($link);
+        $linkResource->save($expected);
+        $statement = $this->db->query("SELECT * FROM " . $this->dbTablePrefix . "links WHERE link_title = 'testSaveShouldSaveALinkIntoTheDatabase'");
+        $actual = $statement->fetchAll(\PDO::FETCH_ASSOC);
+        $this->assertEquals(count($actual), 1);
+        $this->assertEquals($actual[0]['link_url_title'], $expected['link_url_title']);
+        $this->assertEquals($actual[0]['link_title'], $expected['link_title']);
+        $this->assertEquals($actual[0]['link_url'], $expected['link_url']);
     }
     /**
      * SetUp the Link Resource, and return the object
