@@ -122,6 +122,34 @@ class LinkTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($actual[0]['link_url'], $expected['link_url']);
     }
     /**
+     * test that save() strips tags on specific fields
+     *
+     * @return void
+     * @access public
+     * @author Johnathan Pulos
+     **/
+    public function testSaveShouldStripTagsFromSpecificFields()
+    {
+        $link = $this->linkFactory;
+        $expected = $this->linkFactory;
+        $link['link_title'] = 'testSaveShouldStripTagsFromSpecificFields';
+        $link['link_url_title'] = '<p>My Title With <strong>Tags</strong></p>';
+        $link['link_content'] = '<p><strong>Really Bold Content</strong></p>';
+        $link['link_summary'] = '<p><em>Really Emphasized Content</em></p>';
+
+        $expected['link_title'] = $link['link_title'];
+        $expected['link_url_title'] = 'My Title With Tags';
+        $expected['link_content'] = 'Really Bold Content';
+        $expected['link_summary'] = 'Really Emphasized Content';
+        $linkResource = $this->setUpLinkResource();
+        $linkResource->save($link);
+        $statement = $this->db->query("SELECT * FROM " . $this->dbTablePrefix . "links WHERE link_title = 'testSaveShouldStripTagsFromSpecificFields'");
+        $actual = $statement->fetchAll(\PDO::FETCH_ASSOC);
+        $this->assertEquals($actual[0]['link_url_title'], $expected['link_url_title']);
+        $this->assertEquals($actual[0]['link_content'], $expected['link_content']);
+        $this->assertEquals($actual[0]['link_summary'], $expected['link_summary']);
+    }
+    /**
      * SetUp the Link Resource, and return the object
      *
      * @return \Resources\Link
