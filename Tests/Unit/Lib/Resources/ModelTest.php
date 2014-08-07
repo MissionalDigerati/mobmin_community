@@ -78,13 +78,13 @@ class ModelTest extends \PHPUnit_Framework_TestCase
      **/
     public function testGetInsertQueryShouldGenerateTheCorrectQuery()
     {
-        $expected = "INSERT INTO " . $this->dbTablePrefix . "users(name) VALUES(:name)";
+        $expected = "INSERT INTO " . $this->dbTablePrefix . "users(name, date) VALUES(:name, :date)";
         $model = new \Resources\Model($this->db);
         $reflectionOfModel = new \ReflectionClass('\Resources\Model');
-        
+
         $accessibleAttributes = $reflectionOfModel->getProperty('accessibleAttributes');
         $accessibleAttributes->setAccessible(true);
-        $accessibleAttributes->setValue($model, array('name'));
+        $accessibleAttributes->setValue($model, array('name', 'date'));
 
         $tableName = $reflectionOfModel->getProperty('tableName');
         $tableName->setAccessible(true);
