@@ -116,9 +116,9 @@ class LinkTest extends \PHPUnit_Framework_TestCase
         $statement = $this->db->query("SELECT * FROM " . $this->dbTablePrefix . "links WHERE link_title = 'testSaveShouldSaveALinkIntoTheDatabase'");
         $actual = $statement->fetchAll(\PDO::FETCH_ASSOC);
         $this->assertEquals(count($actual), 1);
-        $this->assertEquals($actual[0]['link_url_title'], $expected['link_url_title']);
-        $this->assertEquals($actual[0]['link_title'], $expected['link_title']);
-        $this->assertEquals($actual[0]['link_url'], $expected['link_url']);
+        $this->assertEquals($expected['link_url_title'], $actual[0]['link_url_title']);
+        $this->assertEquals($expected['link_title'], $actual[0]['link_title']);
+        $this->assertEquals($expected['link_url'], $actual[0]['link_url']);
     }
     /**
      * test that save() strips tags on specific fields
@@ -144,9 +144,9 @@ class LinkTest extends \PHPUnit_Framework_TestCase
         $linkResource->save($link);
         $statement = $this->db->query("SELECT * FROM " . $this->dbTablePrefix . "links WHERE link_title = 'testSaveShouldStripTagsFromSpecificFields'");
         $actual = $statement->fetchAll(\PDO::FETCH_ASSOC);
-        $this->assertEquals($actual[0]['link_url_title'], $expected['link_url_title']);
-        $this->assertEquals($actual[0]['link_content'], $expected['link_content']);
-        $this->assertEquals($actual[0]['link_summary'], $expected['link_summary']);
+        $this->assertEquals($expected['link_url_title'], $actual[0]['link_url_title']);
+        $this->assertEquals($expected['link_content'], $actual[0]['link_content']);
+        $this->assertEquals($expected['link_summary'], $actual[0]['link_summary']);
     }
     /**
      * test save() sets link_randkey automatically
@@ -164,7 +164,7 @@ class LinkTest extends \PHPUnit_Framework_TestCase
         $linkResource->save($expected);
         $statement = $this->db->query("SELECT link_randkey FROM " . $this->dbTablePrefix . "links WHERE link_title = 'testSaveShouldAutomaticallySetTheRandomLinkKey'");
         $actual = $statement->fetchAll(\PDO::FETCH_ASSOC);
-        $this->assertNotEquals(intval($actual[0]['link_randkey']), 0);
+        $this->assertNotEquals(0, intval($actual[0]['link_randkey']));
     }
     /**
      * SetUp the Link Resource, and return the object
