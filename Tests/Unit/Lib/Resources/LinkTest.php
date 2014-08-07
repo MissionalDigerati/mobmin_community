@@ -100,19 +100,6 @@ class LinkTest extends \PHPUnit_Framework_TestCase
         $this->db->query("DELETE FROM " . $this->dbTablePrefix . "links");
     }
     /**
-     * setDatabaseObject should throw an error on non PDO objects
-     *
-     * @return void
-     * @access public
-     * @expectedException InvalidArgumentException
-     * @author Johnathan Pulos
-     **/
-    public function testSetDatabaseObjectShouldThrowAnErrorIfGivenANonPDOObject()
-    {
-        $linkResource = $this->setUpLinkResource();
-        $linkResource->setDatabaseObject('not a PDO object');
-    }
-    /**
      * test that save() adds the record to the database
      *
      * @return void
@@ -143,9 +130,8 @@ class LinkTest extends \PHPUnit_Framework_TestCase
      **/
     private function setUpLinkResource()
     {
-        $linkResource = new \Resources\Link();
+        $linkResource = new \Resources\Link($this->db);
         $linkResource->setTablePrefix($this->dbTablePrefix);
-        $linkResource->setDatabaseObject($this->db);
         return $linkResource;
     }
 }

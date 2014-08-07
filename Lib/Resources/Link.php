@@ -25,49 +25,8 @@ namespace Resources;
 /**
  * The Link Resource for managing links to the Pligg site
  */
-class Link
+class Link extends Model
 {
-    /**
-     * The table prefix for the links table
-     *
-     * @var string
-     **/
-    private $tablePrefix = '';
-    /**
-     * The database object
-     *
-     * @var \PDO
-     * @access private
-     **/
-    private $db;
-    /**
-     * Set the table prefix for the database table
-     *
-     * @param string $prefix the table prefix
-     * @return void
-     * @access public
-     * @author Johnathan Pulos
-     **/
-    public function setTablePrefix($prefix)
-    {
-        $this->tablePrefix = $prefix;
-    }
-    /**
-     * Set the PDO Database Object
-     *
-     * @param \PDO $db The database connection
-     * @return void
-     * @access public
-     * @author Johnathan Pulos
-     **/
-    public function setDatabaseObject($db)
-    {
-        if (is_a($db, 'PDO')) {
-            $this->db = $db;
-        } else {
-            throw new \InvalidArgumentException('$db must be of the class \PDO.');
-        }
-    }
     /**
      * Insert/Update the link in the database.  Pass an id to update.
      *
