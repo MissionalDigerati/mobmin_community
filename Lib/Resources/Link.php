@@ -67,19 +67,5 @@ class Link extends Model
             return $this->insertRecord($data);
         }
     }
-    /**
-     * Insert a new Link Resource
-     *
-     * @param array $data an array of the link data to save
-     * @return boolean Did it save?
-     * @author Johnathan Pulos
-     **/
-    protected function insertRecord($data)
-    {
-        $query = $this->getInsertQuery();
-        $stmt = $this->db->prepare($query);
-        $stmt = $this->bindValues($stmt, $data, 'insert');
-        return $stmt->execute();
-    }
 
 }

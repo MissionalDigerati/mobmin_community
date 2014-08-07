@@ -104,6 +104,19 @@ class Model
         }
     }
     /**
+     * Insert a new Link Resource
+     *
+     * @param array $data an array of the link data to save
+     * @return boolean Did it save?
+     * @author Johnathan Pulos
+     **/
+    protected function insertRecord($data)
+    {
+        $stmt = $this->db->prepare($this->getInsertQuery());
+        $stmt = $this->bindValues($stmt, $data, 'insert');
+        return $stmt->execute();
+    }
+    /**
      * Generates the insert SQL query based on the set $accessibleAttributes class variable
      *
      * @return string The final Query statement
