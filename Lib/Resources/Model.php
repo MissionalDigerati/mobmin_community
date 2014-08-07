@@ -145,7 +145,7 @@ class Model
                 $value = $this->prepareAttribute($attribute, $data[$attribute]);
             } else {
                 if (strtolower($queryType) == 'insert') {
-                    $value = '';
+                    $value = $this->prepareAttribute($attribute, '');
                 }
             }
             $statement->bindValue(":" . $attribute, $value);

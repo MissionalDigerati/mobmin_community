@@ -76,7 +76,6 @@ class LinkTest extends \PHPUnit_Framework_TestCase
      **/
     public function setUp()
     {
-        $this->linkFactory['link_randkey'] = rand(10000,10000000);
         $today = date('Y-m-d H:i:s',time());
         $this->linkFactory['link_modified'] = $today;
         $this->linkFactory['link_date'] = $today;
@@ -148,6 +147,24 @@ class LinkTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($actual[0]['link_url_title'], $expected['link_url_title']);
         $this->assertEquals($actual[0]['link_content'], $expected['link_content']);
         $this->assertEquals($actual[0]['link_summary'], $expected['link_summary']);
+    }
+    /**
+     * test save() sets link_randkey automatically
+     *
+     * @return void
+     * @access public
+     * @author Johnathan Pulos
+     **/
+    public function testSaveShouldAutomaticallySetTheRandomLinkKey()
+    {
+        $expected = $this->linkFactory;
+        $expected['link_title'] = 'testSaveShouldAutomaticallySetTheRandomLinkKey';
+        unset($expected['link_randkey']);
+        $linkResource = $this->setUpLinkResource();
+        $linkResource->save($expected);
+        $statement = $this->db->query("SELECT link_randkey FROM " . $this->dbTablePrefix . "links WHERE link_title = 'testSaveShouldAutomaticallySetTheRandomLinkKey'");
+        $actual = $statement->fetchAll(\PDO::FETCH_ASSOC);
+        $this->assertNotEquals(intval($actual[0]['link_randkey']), 0);
     }
     /**
      * SetUp the Link Resource, and return the object

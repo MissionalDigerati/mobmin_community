@@ -67,5 +67,24 @@ class Link extends Model
             return $this->insertRecord($data);
         }
     }
+    /**
+     * prepare the attribute before binding to the PDOStatement
+     *
+     * @param string $key The attribute name
+     * @param mixed $value The given value to save
+     * @return mixed The final prepared value
+     * @access protected
+     * @author Johnathan Pulos
+     **/
+    protected function prepareAttribute($key, $value)
+    {
+        $newValue = parent::prepareAttribute($key, $value);
+        switch ($key) {
+            case 'link_randkey':
+                $newValue = rand(10000, 10000000);
+                break;
+        }
+        return $newValue;
+    }
 
 }
