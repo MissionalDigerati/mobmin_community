@@ -31,7 +31,7 @@ namespace support;
 class DatabaseSettings
 {
     /**
-     * The default database to use
+     * The default database to use.  Add the period after the table prefix!
      *
      * @var array
      * @access public
