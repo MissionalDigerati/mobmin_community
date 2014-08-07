@@ -28,23 +28,45 @@ namespace Resources;
 class Link
 {
     /**
+     * The table prefix for the links table
+     *
+     * @var string
+     **/
+    private $tablePrefix = '';
+    /**
      * The database object
      *
-     * @var \PHPToolbox\PDODatabase\PDODatabaseConnect
+     * @var \PDO
      * @access private
      **/
     private $db;
     /**
-     * Setup the link resource
+     * Set the table prefix for the database table
      *
-     * @param \PHPToolbox\PDODatabase\PDODatabaseConnect $db The database connection
+     * @param string $prefix the table prefix
      * @return void
      * @access public
      * @author Johnathan Pulos
      **/
-    public function __construct($db)
+    public function setTablePrefix($prefix)
     {
-        $this->db = $db;
+        $this->tablePrefix = $prefix;
+    }
+    /**
+     * Set the PDO Database Object
+     *
+     * @param \PDO $db The database connection
+     * @return void
+     * @access public
+     * @author Johnathan Pulos
+     **/
+    public function setDatabaseObject($db)
+    {
+        if (is_a($db, 'PDO')) {
+            $this->db = $db;
+        } else {
+            throw new \InvalidArgumentException('$db must be of the class \PDO.');
+        }
     }
     /**
      * Save the link into the database
@@ -57,4 +79,5 @@ class Link
     public function save($link)
     {
     }
+
 }

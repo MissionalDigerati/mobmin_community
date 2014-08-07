@@ -36,9 +36,10 @@ class DatabaseSettings
      * @var array
      * @access public
      */
-    public $default = array(    'host'      =>  'HOST',
-                                'name'      =>  'DATABASE_NAME',
-                                'username'  =>  'USERNAME',
-                                'password'  =>  'PASSWORD'
+    public $default = array(    'host'          =>  'HOST',
+                                'name'          =>  'DATABASE_NAME',
+                                'username'      =>  'USERNAME',
+                                'password'      =>  'PASSWORD',
+                                'table_prefix'  =>  ''
                             );
 }

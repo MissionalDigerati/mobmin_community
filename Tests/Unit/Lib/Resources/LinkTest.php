@@ -37,6 +37,13 @@ class LinkTest extends \PHPUnit_Framework_TestCase
      */
     private $db;
     /**
+     * The database table prefix
+     *
+     * @var string
+     * @access private
+     **/
+    private $dbTablePrefix;
+    /**
      * A factory for creating a link
      *
      * @var array
@@ -76,8 +83,23 @@ class LinkTest extends \PHPUnit_Framework_TestCase
         $this->linkFactory['link_published_date'] = $today;
 
         $pdoDb = \PHPToolbox\PDODatabase\PDODatabaseConnect::getInstance();
-        $pdoDb->setDatabaseSettings(new \support\DatabaseSettings);
+        $dbSettings = new \Support\DatabaseSettings();
+        $this->dbTablePrefix = $dbSettings->default['table_prefix'];
+        $pdoDb->setDatabaseSettings($dbSettings);
         $this->db = $pdoDb->getDatabaseInstance();
+    }
+    /**
+     * setDatabaseObject should throw an error on non PDO objects
+     *
+     * @return void
+     * @access public
+     * @expectedException InvalidArgumentException
+     * @author Johnathan Pulos
+     **/
+    public function testSetDatabaseObjectShouldThrowAnErrorIfGivenANonPDOObject()
+    {
+        $linkResource = $this->setUpLinkResource();
+        $linkResource->setDatabaseObject('not a PDO object');
     }
     /**
      * test that save() adds the record to the database
@@ -90,7 +112,21 @@ class LinkTest extends \PHPUnit_Framework_TestCase
     {
         $link = $this->linkFactory;
         $link['link_title'] = 'testSaveShouldSaveALinkIntoTheDatabase';
-        $linkResource = new \Resources\Link($this->db);
+        $linkResource = $this->setUpLinkResource();
         $linkResource->save($link);
+    }
+    /**
+     * SetUp the Link Resource, and return the object
+     *
+     * @return \Resources\Link
+     * @access private
+     * @author Johnathan Pulos
+     **/
+    private function setUpLinkResource()
+    {
+        $linkResource = new \Resources\Link();
+        $linkResource->setTablePrefix($this->dbTablePrefix);
+        $linkResource->setDatabaseObject($this->db);
+        return $linkResource;
     }
 }
