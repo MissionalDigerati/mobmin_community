@@ -64,7 +64,7 @@ class LinkTest extends \PHPUnit_Framework_TestCase
         'link_title'            =>  'Google',
         'link_title_url'        =>  'www-google-com',
         'link_content'          =>  'A great place to search for the best.',
-        'link_summary'          =>  'I really love this place!',
+        'link_summary'          =>  '',
         'link_tags'             =>  'google, rocks'
     );
     /**
@@ -134,7 +134,6 @@ class LinkTest extends \PHPUnit_Framework_TestCase
         $link['link_title'] = 'testSaveShouldStripTagsFromSpecificFields';
         $link['link_url_title'] = '<p>My Title With <strong>Tags</strong></p>';
         $link['link_content'] = '<p><strong>Really Bold Content</strong></p>';
-        $link['link_summary'] = '<p><em>Really Emphasized Content</em></p>';
 
         $expected['link_title'] = $link['link_title'];
         $expected['link_url_title'] = 'My Title With Tags';
@@ -146,7 +145,6 @@ class LinkTest extends \PHPUnit_Framework_TestCase
         $actual = $statement->fetchAll(\PDO::FETCH_ASSOC);
         $this->assertEquals($expected['link_url_title'], $actual[0]['link_url_title']);
         $this->assertEquals($expected['link_content'], $actual[0]['link_content']);
-        $this->assertEquals($expected['link_summary'], $actual[0]['link_summary']);
     }
     /**
      * test save() sets link_randkey automatically
@@ -165,6 +163,44 @@ class LinkTest extends \PHPUnit_Framework_TestCase
         $statement = $this->db->query("SELECT link_randkey FROM " . $this->dbTablePrefix . "links WHERE link_title = 'testSaveShouldAutomaticallySetTheRandomLinkKey'");
         $actual = $statement->fetchAll(\PDO::FETCH_ASSOC);
         $this->assertNotEquals(0, intval($actual[0]['link_randkey']));
+    }
+    /**
+     * save() should throw an error if link status does not equal a valid value
+     *
+     * @return void
+     * @access public
+     * @expectedException InvalidArgumentException
+     * @author Johnathan Pulospublic
+     **/
+    public function testSaveShouldThrowErrorIfLinkStatusIsInvalid()
+    {
+        $expected = $this->linkFactory;
+        $expected['link_status'] = 'pass_not_fail';
+        $linkResource = $this->setUpLinkResource();
+        $linkResource->save($expected);
+    }
+    /**
+     * save() should automatically generate the link summary with only 150 characters
+     *
+     * @return void
+     * @access public
+     * @author Johnathan Pulospublic
+     **/
+    public function testSaveShouldAutomaticallyGenerateTheLinkSummary()
+    {
+        $expected = 150;
+        $link = $this->linkFactory;
+        $link['link_title'] = 'testSaveShouldAutomaticallyGenerateTheLinkSummary';
+        $link['link_content'] = "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor " .
+            "incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco " .
+            "laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate " .
+            "velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt" .
+            " in culpa qui officia deserunt mollit anim id est laborum.";
+        $linkResource = $this->setUpLinkResource();
+        $linkResource->save($link);
+        $statement = $this->db->query("SELECT link_summary FROM " . $this->dbTablePrefix . "links WHERE link_title = 'testSaveShouldAutomaticallyGenerateTheLinkSummary'");
+        $actual = $statement->fetchAll(\PDO::FETCH_ASSOC);
+        $this->assertEquals($expected, strlen($actual[0]['link_summary']));
     }
     /**
      * SetUp the Link Resource, and return the object

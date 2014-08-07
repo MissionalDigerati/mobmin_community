@@ -53,6 +53,20 @@ class Link extends Model
         'link_content', 'link_summary', 'link_tags'
     );
     /**
+     * A whitelist of all allowable link status
+     *
+     * @var array
+     * @access protected
+     **/
+    protected $whitelistLinkStatuses = array('published', 'new', 'discard');
+    /**
+     * The length to truncate the content to in order to create the summary
+     *
+     * @var integer
+     * @access protected
+     **/
+    protected $summaryLength = 150;
+    /**
      * Insert/Update the link in the database.  Pass an id to update.
      *
      * @param array $data an array of the link data to save
@@ -64,6 +78,7 @@ class Link extends Model
     public function save($data, $id = null)
     {
         if (is_null($id)) {
+            $data['link_summary'] = $this->createSummary($data['link_content']);
             return $this->insertRecord($data);
         }
     }
@@ -83,8 +98,32 @@ class Link extends Model
             case 'link_randkey':
                 $newValue = rand(10000, 10000000);
                 break;
+            case 'link_status':
+                if (!in_array($newValue, $this->whitelistLinkStatuses)) {
+                    throw new \InvalidArgumentException(
+                        "Attribute link_status can only be: " . implode(', ', $this->whitelistLinkStatuses) . "."
+                    );
+                }
+                break;
         }
         return $newValue;
     }
-
+    /**
+     * Create a snippet summary of the given link content
+     *
+     * @param string $content The current content for the link
+     * @return string The truncated summary
+     * @access public
+     * @author Johnathan Pulos
+     **/
+    protected function createSummary($content)
+    {
+        $content = strip_tags($content);
+        $contentLength = strlen($content);
+        if ($contentLength > $this->summaryLength) {
+            return substr($content, 0, $this->summaryLength);
+        } else {
+            return $content;
+        }
+    }
 }
