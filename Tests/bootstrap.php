@@ -56,6 +56,7 @@ $loader->add("PHPToolbox\PDODatabase\PDODatabaseConnect", $PHPToolboxDirectory);
  */
 $loader->add("Resources\Model", $libDirectory);
 $loader->add("Resources\Link", $libDirectory);
+$loader->add("Resources\Tag", $libDirectory);
 /**
  * autoload models & test files
  *
