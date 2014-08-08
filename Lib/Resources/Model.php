@@ -24,6 +24,7 @@
 
 /**
  * The Model object for eavh resource
+ * @todo Implement update script
  */
 class Model
 {

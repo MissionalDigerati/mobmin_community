@@ -114,6 +114,7 @@ class Link extends Model
      * @return boolean Did it save the data?
      * @access public
      * @author Johnathan Pulos
+     * @todo Implement update script
      **/
     public function save($data, $id = null)
     {
