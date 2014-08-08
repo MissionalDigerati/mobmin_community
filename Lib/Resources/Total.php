@@ -54,6 +54,7 @@ class Total extends Model
      * @param string $status The status to increment (published, new, discard)
      * @return boolean Did it save?
      * @access public
+     * @throws InvalidArgumentException if $status is not 'published', 'new', or 'discard'
      * @author Johnathan Pulos
      **/
     public function increment($status)
