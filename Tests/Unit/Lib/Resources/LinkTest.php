@@ -97,6 +97,7 @@ class LinkTest extends \PHPUnit_Framework_TestCase
     public function tearDown()
     {
         $this->db->query("DELETE FROM " . $this->dbTablePrefix . "links");
+        $this->db->query("DELETE FROM " . $this->dbTablePrefix . "tags");
     }
     /**
      * test that save() adds the record to the database
