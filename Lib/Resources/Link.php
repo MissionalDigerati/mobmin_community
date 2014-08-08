@@ -80,12 +80,31 @@ class Link extends Model
      * @param \Resources\Tag $tagObject The tag object
      * @return void
      * @throws InvalidArgumentException if $db is not a \PDO Object
+     * @throws InvalidArgumentException if $tagObject is not a \Resources\Tag Object
      * @author Johnathan Pulos
      **/
     public function __construct($db, $tagObject)
     {
         parent::__construct($db);
-        $this->tag = $tagObject;
+        $this->setTagObject($tagObject);
+    }
+    /**
+     * Set the \Resources\Tag Object
+     *
+     * @param \Resources\Tag $tagObject The \Resources\Tag Object
+     * @return void
+     * @access protected
+     * @throws InvalidArgumentException if $tagObject is not a \Resources\Tag Object
+     * @author Johnathan Pulos
+     **/
+    protected function setTagObject($tagObject)
+    {
+        if (is_a($tagObject, '\Resources\Tag')) {
+            $this->tag = $tagObject;
+        } else {
+            throw new \InvalidArgumentException('$tagObject must be of the class \Resources\Tag.');
+            exit;
+        }
     }
     /**
      * Insert/Update the link in the database.  Pass an id to update.

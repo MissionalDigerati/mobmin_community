@@ -100,6 +100,20 @@ class LinkTest extends \PHPUnit_Framework_TestCase
         $this->db->query("DELETE FROM " . $this->dbTablePrefix . "tags");
     }
     /**
+     * __construct() should throw an error if you pass a non \Resources\Tag object
+     *
+     * @return void
+     * @access public
+     * @expectedException InvalidArgumentException
+     * @author Johnathan Pulos
+     **/
+    public function testConstructShouldThrowErrorIfTagObjectDoesNotExist()
+    {
+        $expected = $this->linkFactory;
+        $linkResource = $this->setUpLinkResource('I AM NOT A TAG OBJECT');
+        $linkResource->save($expected);
+    }
+    /**
      * test that save() adds the record to the database
      *
      * @return void
