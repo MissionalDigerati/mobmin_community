@@ -63,6 +63,7 @@ $loader->add("Support\CustomAssertions\ArrayHasEntries", __DIR__);
 $loader->add("Resources\Model", $libDirectory);
 $loader->add("Resources\Link", $libDirectory);
 $loader->add("Resources\Tag", $libDirectory);
+$loader->add("Resources\Total", $libDirectory);
 /**
  * autoload models & test files
  *
