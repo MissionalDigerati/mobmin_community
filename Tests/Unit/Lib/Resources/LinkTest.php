@@ -65,7 +65,7 @@ class LinkTest extends \PHPUnit_Framework_TestCase
         'link_title_url'        =>  'www-google-com',
         'link_content'          =>  'A great place to search for the best.',
         'link_summary'          =>  '',
-        'link_tags'             =>  'google, rocks'
+        'link_tags'             =>  ''
     );
     /**
      * Setup the test
@@ -223,15 +223,59 @@ class LinkTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($expected, $actual);
     }
     /**
+     * save() should trigger a tag save on each tag in a comma seperated string
+     *
+     * @return void
+     * @access public
+     * @author Johnathan Pulos
+     **/
+    public function testSaveShouldSaveEachTagWhenSavingTheLink()
+    {
+        $link = $this->linkFactory;
+        $link['link_tags'] = 'kermit, muppet, fozie bear, ms. piggy, gonzo';
+        $tagObject = $this->getMock('\Resources\Tag', array('save'), array($this->db));
+        $tagObject->expects($this->exactly(5))
+                    ->method('save')
+                    ->withConsecutive(
+                        array(new \Support\CustomAssertions\ArrayHasEntries(array('tag_words'  =>  'kermit'))),
+                        array(new \Support\CustomAssertions\ArrayHasEntries(array('tag_words'  =>  'muppet'))),
+                        array(new \Support\CustomAssertions\ArrayHasEntries(array('tag_words'  =>  'fozie bear'))),
+                        array(new \Support\CustomAssertions\ArrayHasEntries(array('tag_words'  =>  'ms. piggy'))),
+                        array(new \Support\CustomAssertions\ArrayHasEntries(array('tag_words'  =>  'gonzo')))
+                    );
+        $linkResource = $this->setUpLinkResource($tagObject);
+        $linkResource->save($link);
+    }
+    /**
+     * save() should not call save() on tags if no tags provided
+     *
+     * @return void
+     * @access public
+     * @author Johnathan Pulos
+     **/
+    public function testSaveShouldNotTriggerSaveOnTagsIfItIsEmpty()
+    {
+        $link = $this->linkFactory;
+        $link['link_tags'] = '';
+        $tagObject = $this->getMock('\Resources\Tag', array('save'), array($this->db));
+        $tagObject->expects($this->never())->method('save');
+        $linkResource = $this->setUpLinkResource($tagObject);
+        $linkResource->save($link);
+    }
+    /**
      * SetUp the Link Resource, and return the object
      *
+     * @param \Resources\Tag $tagObject The tag object (default: null)
      * @return \Resources\Link
      * @access private
      * @author Johnathan Pulos
      **/
-    private function setUpLinkResource()
+    private function setUpLinkResource($tagObject = null)
     {
-        $linkResource = new \Resources\Link($this->db);
+        if (is_null($tagObject)) {
+            $tagObject = $this->getMock('\Resources\Tag', array('save'), array($this->db));
+        }
+        $linkResource = new \Resources\Link($this->db, $tagObject);
         $linkResource->setTablePrefix($this->dbTablePrefix);
         return $linkResource;
     }

@@ -50,6 +50,12 @@ $loader->add("Support\DatabaseSettings", __DIR__);
  */
 $loader->add("PHPToolbox\PDODatabase\PDODatabaseConnect", $PHPToolboxDirectory);
 /**
+ * Autoload Custom Test Framework Assertions
+ *
+ * @author Johnathan Pulos
+ **/
+$loader->add("Support\CustomAssertions\ArrayHasEntries", __DIR__);
+/**
  * Autoload the lib classes
  *
  * @author Johnathan Pulos

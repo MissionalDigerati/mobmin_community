@@ -28,6 +28,13 @@ namespace Resources;
 class Link extends Model
 {
     /**
+     * The Tag Resource object
+     *
+     * @var \Resources\Tag
+     * @access protected
+     **/
+    protected $tag;
+    /**
      * The table name to query
      *
      * @var string
@@ -67,6 +74,20 @@ class Link extends Model
      **/
     protected $summaryLength = 150;
     /**
+     * Construct the model object
+     *
+     * @param \PDO $db The database connection
+     * @param \Resources\Tag $tagObject The tag object
+     * @return void
+     * @throws InvalidArgumentException if $db is not a \PDO Object
+     * @author Johnathan Pulos
+     **/
+    public function __construct($db, $tagObject)
+    {
+        parent::__construct($db);
+        $this->tag = $tagObject;
+    }
+    /**
      * Insert/Update the link in the database.  Pass an id to update.
      *
      * @param array $data an array of the link data to save
@@ -79,7 +100,33 @@ class Link extends Model
     {
         if (is_null($id)) {
             $data['link_summary'] = $this->createSummary($data['link_content']);
-            return $this->insertRecord($data);
+            if ($saved = $this->insertRecord($data)) {
+                $this->saveTags($data);
+            }
+        }
+        return $saved;
+    }
+    /**
+     * Save the tags for the link
+     *
+     * @param array $data The link data
+     * @return void
+     * @access private
+     * @author Johnathan Pulos
+     **/
+    private function saveTags($data)
+    {
+        $linkId = $this->getLastID();
+        $tagList = explode(',', $data['link_tags']);
+        if (($data['link_tags'] != '') && (count($tagList) > 0)) {
+            foreach ($tagList as $singleTag) {
+                $tagData = array(
+                    'tag_link_id'   =>  $linkId,
+                    'tag_date'      =>  date('Y-m-d H:i:s',time()),
+                    'tag_words'     =>  trim(strip_tags($singleTag)),
+                );
+                $this->tag->save($tagData);
+            }
         }
     }
     /**
