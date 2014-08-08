@@ -28,12 +28,19 @@ namespace Resources;
 class Link extends Model
 {
     /**
-     * The Tag Resource object
+     * The \Resources\Tag Resource object
      *
      * @var \Resources\Tag
      * @access protected
      **/
-    protected $tag;
+    protected $tagResource;
+    /**
+     * The \Resources\Total Resource object
+     *
+     * @var \Resources\Total
+     * @access protected
+     **/
+    protected $totalResource;
     /**
      * The table name to query
      *
@@ -83,10 +90,11 @@ class Link extends Model
      * @throws InvalidArgumentException if $tagObject is not a \Resources\Tag Object
      * @author Johnathan Pulos
      **/
-    public function __construct($db, $tagObject)
+    public function __construct($db, $tagObject, $totalObject)
     {
         parent::__construct($db);
         $this->setTagObject($tagObject);
+        $this->setTotalObject($totalObject);
     }
     /**
      * Set the \Resources\Tag Object
@@ -100,9 +108,27 @@ class Link extends Model
     protected function setTagObject($tagObject)
     {
         if (is_a($tagObject, '\Resources\Tag')) {
-            $this->tag = $tagObject;
+            $this->tagResource = $tagObject;
         } else {
             throw new \InvalidArgumentException('$tagObject must be of the class \Resources\Tag.');
+            exit;
+        }
+    }
+    /**
+     * Set the \Resources\Total Object
+     *
+     * @param \Resources\Total $totalObject The \Resources\Total Object
+     * @return void
+     * @access protected
+     * @throws InvalidArgumentException if $totalObject is not a \Resources\Total Object
+     * @author Johnathan Pulos
+     **/
+    protected function setTotalObject($totalObject)
+    {
+        if (is_a($totalObject, '\Resources\Total')) {
+            $this->totalResource = $totalObject;
+        } else {
+            throw new \InvalidArgumentException('$totalObject must be of the class \Resources\Total.');
             exit;
         }
     }
@@ -122,6 +148,7 @@ class Link extends Model
             $data['link_summary'] = $this->createSummary($data['link_content']);
             if ($saved = $this->insertRecord($data)) {
                 $this->saveTags($data);
+                $this->totalResource->increment($data['link_status']);
             }
         }
         return $saved;
@@ -145,7 +172,7 @@ class Link extends Model
                     'tag_date'      =>  date('Y-m-d H:i:s',time()),
                     'tag_words'     =>  trim(strip_tags($singleTag)),
                 );
-                $this->tag->save($tagData);
+                $this->tagResource->save($tagData);
             }
         }
     }
@@ -170,6 +197,7 @@ class Link extends Model
                     throw new \InvalidArgumentException(
                         "Attribute link_status can only be: " . implode(', ', $this->whitelistLinkStatuses) . "."
                     );
+                    exit;
                 }
                 break;
         }

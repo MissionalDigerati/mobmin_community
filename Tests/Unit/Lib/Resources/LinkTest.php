@@ -98,6 +98,13 @@ class LinkTest extends \PHPUnit_Framework_TestCase
     {
         $this->db->query("DELETE FROM " . $this->dbTablePrefix . "links");
         $this->db->query("DELETE FROM " . $this->dbTablePrefix . "tags");
+        $this->db->query("DELETE FROM " . $this->dbTablePrefix . "totals");
+        /**
+         * Setup the totals table to the default
+         */
+        $this->db->query("INSERT INTO " . $this->dbTablePrefix . "totals (name, total) VALUES('published', 0)");
+        $this->db->query("INSERT INTO " . $this->dbTablePrefix . "totals (name, total) VALUES('new', 0)");
+        $this->db->query("INSERT INTO " . $this->dbTablePrefix . "totals (name, total) VALUES('discard', 0)");
     }
     /**
      * __construct() should throw an error if you pass a non \Resources\Tag object
@@ -109,9 +116,23 @@ class LinkTest extends \PHPUnit_Framework_TestCase
      **/
     public function testConstructShouldThrowErrorIfTagObjectDoesNotExist()
     {
-        $expected = $this->linkFactory;
+        $link = $this->linkFactory;
         $linkResource = $this->setUpLinkResource('I AM NOT A TAG OBJECT');
-        $linkResource->save($expected);
+        $linkResource->save($link);
+    }
+    /**
+     * __construct() should throw an error if you pass a non \Resources\Total object
+     *
+     * @return void
+     * @access public
+     * @expectedException InvalidArgumentException
+     * @author Johnathan Pulos
+     **/
+    public function testConstructShouldThrowErrorIfTotalObjectDoesNotExist()
+    {
+        $link = $this->linkFactory;
+        $linkResource = $this->setUpLinkResource(null, 'I AM NOT A TOTAL OBJECT');
+        $linkResource->save($link);
     }
     /**
      * test that save() adds the record to the database
@@ -238,7 +259,7 @@ class LinkTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($expected, $actual);
     }
     /**
-     * save() should trigger a tag save on each tag in a comma seperated string
+     * save() should trigger a \Resources\Tag->save() on each tag in a comma seperated string
      *
      * @return void
      * @access public
@@ -278,19 +299,39 @@ class LinkTest extends \PHPUnit_Framework_TestCase
         $linkResource->save($link);
     }
     /**
+     * save() should trigger \Resources\Total->increment() when inserting a link
+     *
+     * @return void
+     * @access public
+     * @author Johnathan Pulos
+     **/
+    public function testSaveShouldCallTotalIncrementOnTheLinkStatus()
+    {
+        $link = $this->linkFactory;
+        $link['link_status'] = 'new';
+        $totalObject = $this->getMock('\Resources\Total', array('increment'), array($this->db));
+        $totalObject->expects($this->once())->method('increment')->with('new');
+        $linkResource = $this->setUpLinkResource(null, $totalObject);
+        $linkResource->save($link);
+    }
+    /**
      * SetUp the Link Resource, and return the object
      *
-     * @param \Resources\Tag $tagObject The tag object (default: null)
+     * @param \Resources\Tag $tagObject The \Resources\Tag object (default: null)
+     * @param \Resources\Total $totalObject The \Resources\Total object (default: null)
      * @return \Resources\Link
      * @access private
      * @author Johnathan Pulos
      **/
-    private function setUpLinkResource($tagObject = null)
+    private function setUpLinkResource($tagObject = null, $totalObject = null)
     {
         if (is_null($tagObject)) {
             $tagObject = $this->getMock('\Resources\Tag', array('save'), array($this->db));
         }
-        $linkResource = new \Resources\Link($this->db, $tagObject);
+        if (is_null($totalObject)) {
+            $totalObject = $this->getMock('\Resources\Total', array('increment'), array($this->db));
+        }
+        $linkResource = new \Resources\Link($this->db, $tagObject, $totalObject);
         $linkResource->setTablePrefix($this->dbTablePrefix);
         return $linkResource;
     }
