@@ -170,7 +170,7 @@ class LinkTest extends \PHPUnit_Framework_TestCase
      * @return void
      * @access public
      * @expectedException InvalidArgumentException
-     * @author Johnathan Pulospublic
+     * @author Johnathan Pulos
      **/
     public function testSaveShouldThrowErrorIfLinkStatusIsInvalid()
     {
@@ -184,7 +184,7 @@ class LinkTest extends \PHPUnit_Framework_TestCase
      *
      * @return void
      * @access public
-     * @author Johnathan Pulospublic
+     * @author Johnathan Pulos
      **/
     public function testSaveShouldAutomaticallyGenerateTheLinkSummary()
     {
@@ -201,6 +201,26 @@ class LinkTest extends \PHPUnit_Framework_TestCase
         $statement = $this->db->query("SELECT link_summary FROM " . $this->dbTablePrefix . "links WHERE link_title = 'testSaveShouldAutomaticallyGenerateTheLinkSummary'");
         $actual = $statement->fetchAll(\PDO::FETCH_ASSOC);
         $this->assertEquals($expected, strlen($actual[0]['link_summary']));
+    }
+    /**
+     * getLastID() should return the id of the last link inserted
+     *
+     * @return void
+     * @access public
+     * @author Johnathan Pulos
+     **/
+    public function testGetLastIDShouldReturnTheLastInsertedId()
+    {
+        $link = $this->linkFactory;
+        $link['link_title'] = 'testLastIDShouldReturnTheLastInsertedId';
+        $linkResource = $this->setUpLinkResource();
+        $linkResource->save($link);
+        $statement = $this->db->query("SELECT link_id FROM " . $this->dbTablePrefix . "links WHERE link_title = 'testLastIDShouldReturnTheLastInsertedId'");
+        $savedLink = $statement->fetchAll(\PDO::FETCH_ASSOC);
+        $expected = $savedLink[0]['link_id'];
+
+        $actual = $linkResource->getLastID();
+        $this->assertEquals($expected, $actual);
     }
     /**
      * SetUp the Link Resource, and return the object

@@ -63,6 +63,13 @@ class Model
      **/
     protected $db;
     /**
+     * The last inserted id. Set to null if the insert failed.
+     *
+     * @var integer
+     * @access public
+     **/
+    protected $lastID = null;
+    /**
      * Construct the model object
      *
      * @param \PDO $db The database connection
@@ -85,6 +92,17 @@ class Model
     public function setTablePrefix($prefix)
     {
         $this->tablePrefix = $prefix;
+    }
+    /**
+     * get the last inserted id
+     *
+     * @return int The last id
+     * @access public
+     * @author Johnathan Pulos
+     **/
+    public function getLastID()
+    {
+        return $this->lastID;
     }
     /**
      * Set the PDO Database Object
@@ -114,7 +132,13 @@ class Model
     {
         $stmt = $this->db->prepare($this->getInsertQuery());
         $stmt = $this->bindValues($stmt, $data, 'insert');
-        return $stmt->execute();
+        $saved = $stmt->execute();
+        if ($saved === true) {
+            $this->lastID = $this->db->lastInsertId();
+        } else {
+            $this->lastID =  null;
+        }
+        return $saved;
     }
     /**
      * Generates the insert SQL query based on the set $accessibleAttributes class variable
