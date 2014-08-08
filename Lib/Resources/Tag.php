@@ -62,11 +62,7 @@ class Tag extends Model
     public function save($data, $id = null)
     {
         if (is_null($id)) {
-            if ($this->tableHasID('links', 'link_id', $data['tag_link_id']) === false) {
-                throw new \InvalidArgumentException("Attribute tag_link_id must be a valid link id.");
-            } else {
-                return $this->insertRecord($data);
-            }
+            return $this->insertRecord($data);
         }
     }
     /**

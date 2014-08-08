@@ -189,20 +189,5 @@ class Model
     {
         return strip_tags($value);
     }
-    /**
-     * Checks if the given table has the id
-     *
-     * @return boolean Does it haven the id?
-     * @access protected
-     * @author Johnathan Pulos
-     **/
-    protected function tableHasID($tableName, $primaryKey, $id)
-    {
-        $query = "SELECT * FROM " . $this->tablePrefix . $tableName . " WHERE " . $primaryKey . " = :id";
-        $stmt = $this->db->prepare($query);
-        $stmt->bindValue(":id", intval($id));
-        $stmt->execute();
-        return (bool) $stmt->fetchColumn();
 
-    }
 }

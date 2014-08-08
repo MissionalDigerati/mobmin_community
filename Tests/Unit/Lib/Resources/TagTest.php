@@ -71,17 +71,6 @@ class TagTest extends \PHPUnit_Framework_TestCase
         $this->dbTablePrefix = $dbSettings->default['table_prefix'];
         $pdoDb->setDatabaseSettings($dbSettings);
         $this->db = $pdoDb->getDatabaseInstance();
-
-        $this->db->query(
-            "INSERT INTO " . $this->dbTablePrefix . "links(link_author, link_status, link_url, " .
-            "link_url_title, link_title, link_title_url) VALUES('Bob', 'published', 'www.bit.ly', " .
-            "'Bit.ly', 'Bit.ly', 'www.bit.ly')"
-        );
-        $statement = $this->db->query(
-            "SELECT link_id FROM " . $this->dbTablePrefix . "links WHERE link_author = 'Bob'"
-        );
-        $link = $statement->fetchAll(\PDO::FETCH_ASSOC);
-        $this->tagFactory['tag_link_id'] = $link[0]['link_id'];
     }
     /**
      * tearDown for each test
@@ -130,21 +119,6 @@ class TagTest extends \PHPUnit_Framework_TestCase
         $statement = $this->db->query("SELECT * FROM " . $this->dbTablePrefix . "tags WHERE tag_words = 'testSaveShouldStripTagsOnTagWords Method'");
         $actual = $statement->fetchAll(\PDO::FETCH_ASSOC);
         $this->assertEquals($expected, $actual[0]['tag_words']);
-    }
-    /**
-     * save() should throw an error if you send an invalid tag_link_id
-     *
-     * @return void
-     * @access public
-     * @expectedException InvalidArgumentException
-     * @author Johnathan Pulos
-     **/
-    public function testSaveShouldThowErrorIfLinkIDIsInvalid()
-    {
-        $tag = $this->tagFactory;
-        $tag['tag_link_id'] = 0;
-        $tagResource = $this->setUpTagResource();
-        $tagResource->save($tag);
     }
     /**
      * SetUp the Tag Resource, and return the object
