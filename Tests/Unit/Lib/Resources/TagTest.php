@@ -82,7 +82,6 @@ class TagTest extends \PHPUnit_Framework_TestCase
     public function tearDown()
     {
         $this->db->query("DELETE FROM " . $this->dbTablePrefix . "tags");
-        $this->db->query("DELETE FROM " . $this->dbTablePrefix . "links");
     }
     /**
      * save() should save a Tag in the database
