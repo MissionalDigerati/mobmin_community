@@ -239,6 +239,21 @@ class LinkTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($expected, strlen($actual[0]['link_summary']));
     }
     /**
+     * save() should throw an error if you link_author is not set
+     *
+     * @return void
+     * @access public
+     * @expectedException InvalidArgumentException
+     * @author Johnathan Pulos
+     **/
+    public function testSaveThrowsErrorIfLinkAuthorIsNotSet()
+    {
+        $link = $this->linkFactory;
+        $link['link_author'] = null;
+        $linkResource = $this->setUpLinkResource();
+        $linkResource->save($link);
+    }
+    /**
      * getLastID() should return the id of the last link inserted
      *
      * @return void
