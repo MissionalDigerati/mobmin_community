@@ -184,11 +184,20 @@ class Link extends Model
      * @return mixed The final prepared value
      * @access protected
      * @author Johnathan Pulos
+     * @throws InvalidArgumentException if $key = 'link_author' is 0, null, or empty
+     * @throws InvalidArgumentException if $key = 'link_status' is not in $this->whitelistLinkStatuses
      **/
     protected function prepareAttribute($key, $value)
     {
         $newValue = parent::prepareAttribute($key, $value);
         switch ($key) {
+            case 'link_author':
+                $newValue = intval($newValue);
+                if (($newValue == 0) || ($newValue == null) || ($newValue == '')) {
+                    throw new \InvalidArgumentException("Attribute link_author must be a valid user id.");
+                    exit;
+                }
+                break;
             case 'link_randkey':
                 $newValue = rand(10000, 10000000);
                 break;
