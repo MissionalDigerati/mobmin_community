@@ -8,6 +8,8 @@ Production Notes
 
 When setting this up for production,  your document root should be the **webroot** directory.  Code above that directory should be inaccessible!
 
+When upgrading,  make sure the links table retains the field 'social_media_id'.  This is to store the Twitter.providerid.
+
 Development Notes
 -----------------
 
