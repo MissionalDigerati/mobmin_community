@@ -1,0 +1,5 @@
+{
+    "require": {
+        "Aura/Autoload": "dev-master"
+    }
+}

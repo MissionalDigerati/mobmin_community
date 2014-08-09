@@ -49,3 +49,7 @@ webroot/modules/upload/attachments/thumbs/*.gif
 # All .log files
 *.log
 .rvmrc
+phpunit.xml
+
+# Test files
+tests/support/DatabaseSettings.php
