@@ -44,7 +44,7 @@ class TagTest extends \PHPUnit_Framework_TestCase
      **/
     private $dbTablePrefix;
     /**
-     * A factory for creating a link
+     * A factory for creating a tag
      *
      * @var array
      * @access private
