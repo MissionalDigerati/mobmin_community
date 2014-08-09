@@ -64,7 +64,7 @@ class Link extends Model
     protected $accessibleAttributes = array(
         'link_author', 'link_status', 'link_randkey', 'link_votes', 'link_karma', 'link_modified', 'link_date',
         'link_published_date', 'link_category', 'link_url', 'link_url_title', 'link_title', 'link_title_url',
-        'link_content', 'link_summary', 'link_tags'
+        'link_content', 'link_summary', 'link_tags', 'social_media_id'
     );
     /**
      * A whitelist of all allowable link status

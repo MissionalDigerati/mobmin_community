@@ -65,7 +65,8 @@ class LinkTest extends \PHPUnit_Framework_TestCase
         'link_title_url'        =>  'www-google-com',
         'link_content'          =>  'A great place to search for the best.',
         'link_summary'          =>  '',
-        'link_tags'             =>  ''
+        'link_tags'             =>  '',
+        'social_media_id'       =>  'thththrrerkekejssisisjs1221'
     );
     /**
      * Setup the test
@@ -147,6 +148,7 @@ class LinkTest extends \PHPUnit_Framework_TestCase
         $expected['link_url_title'] = 'testSaveShouldSaveALinkIntoTheDatabase.com';
         $expected['link_title'] = 'testSaveShouldSaveALinkIntoTheDatabase';
         $expected['link_url'] = 'http://www.yahoo.com';
+        $expected['social_media_id'] = 'GHFFTTY78861232';
         $linkResource = $this->setUpLinkResource();
         $linkResource->save($expected);
         $statement = $this->db->query("SELECT * FROM " . $this->dbTablePrefix . "links WHERE link_title = 'testSaveShouldSaveALinkIntoTheDatabase'");
@@ -155,6 +157,7 @@ class LinkTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($expected['link_url_title'], $actual[0]['link_url_title']);
         $this->assertEquals($expected['link_title'], $actual[0]['link_title']);
         $this->assertEquals($expected['link_url'], $actual[0]['link_url']);
+        $this->assertEquals($expected['social_media_id'], $actual[0]['social_media_id']);
     }
     /**
      * test that save() strips tags on specific fields
