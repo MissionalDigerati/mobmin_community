@@ -71,5 +71,48 @@ $postGresSettings = $dbSettings->postgres;
 $pgDatabase = new PDO("pgsql:dbname=" . $postGresSettings['name'] . ";host=" . $postGresSettings['host'] . ";");
 $statement = $pgDatabase->query("SELECT * FROM social_media");
 $data = $statement->fetchAll(\PDO::FETCH_ASSOC);
-print_r($data);
+/**
+ * Iterate over all the Tweets
+ */
+foreach ($data as $tweet) {
+    $tweetLinks = array();
+    $tweetHashTags =array();
+    $tweetMentions = array();
+    /**
+     * Parse the content to get the data we need
+     */
+    $dom = new domDocument;
+    $dom->loadHTML($tweet['content']);
+
+    $linkAuthor = $tweet['account'];
+    $linkContent = $tweet['content'];
+    $linkContent .= "<p class='tweet-credits'><em>Tweeted By</em>: <a href='https://twitter.com/" . $linkAuthor . "' target='_blank'>" . $linkAuthor . "</a></p>";
+    echo $linkContent;
+    break;
+    $linkProviderId = $tweet['provider_id'];
+    $tweetedOn = new DateTime($tweet['provider_created_datetime']);
+    // echo $tweetedOn->format('Y-m-d H:i:s');
+    /**
+     * Iterate over the links
+     */
+    $links = $dom->getElementsByTagName('a');
+    foreach ($links as $link) {
+        /**
+         * Check the classes of the link, to determine the type of link
+         */
+        $linkClasses = array();
+        $classNode = $link->attributes->getNamedItem('class');
+        if ($classNode) {
+            $linkClasses = explode(' ', $link->attributes->getNamedItem('class')->value);
+        }
+        $linkText = $link->nodeValue;
+        if (in_array('username', $linkClasses)) {
+            array_push($tweetMentions, $linkText);
+        } elseif (in_array('hashtag', $linkClasses)) {
+            array_push($tweetHashTags, $linkText);
+        } else {
+            array_push($tweetLinks, $linkText);
+        }
+    }
+}
 
