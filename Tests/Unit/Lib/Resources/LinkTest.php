@@ -225,7 +225,6 @@ class LinkTest extends \PHPUnit_Framework_TestCase
      **/
     public function testSaveShouldAutomaticallyGenerateTheLinkSummary()
     {
-        $expected = 150;
         $link = $this->linkFactory;
         $link['link_title'] = 'testSaveShouldAutomaticallyGenerateTheLinkSummary';
         $link['link_content'] = "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor " .
@@ -233,11 +232,12 @@ class LinkTest extends \PHPUnit_Framework_TestCase
             "laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate " .
             "velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt" .
             " in culpa qui officia deserunt mollit anim id est laborum.";
+        $link['link_summary'] = '';
         $linkResource = $this->setUpLinkResource();
         $linkResource->save($link);
         $statement = $this->db->query("SELECT link_summary FROM " . $this->dbTablePrefix . "links WHERE link_title = 'testSaveShouldAutomaticallyGenerateTheLinkSummary'");
         $actual = $statement->fetchAll(\PDO::FETCH_ASSOC);
-        $this->assertEquals($expected, strlen($actual[0]['link_summary']));
+        $this->assertFalse($actual[0]['link_summary'] == '');
     }
     /**
      * save() should throw an error if you link_author is not set

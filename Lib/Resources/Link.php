@@ -212,28 +212,7 @@ class Link extends Model
                     exit;
                 }
                 break;
-            case 'link_summary':
-                $newValue = $this->createSummary($newValue);
-                break;
         }
         return $newValue;
-    }
-    /**
-     * Create a snippet summary of the given link content
-     *
-     * @param string $content The current content for the link
-     * @return string The truncated summary
-     * @access protected
-     * @author Johnathan Pulos
-     **/
-    protected function createSummary($content)
-    {
-        $content = strip_tags($content);
-        $contentLength = strlen($content);
-        if ($contentLength > $this->summaryLength) {
-            return substr($content, 0, $this->summaryLength);
-        } else {
-            return $content;
-        }
     }
 }
