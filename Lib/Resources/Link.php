@@ -201,6 +201,9 @@ class Link extends Model
             case 'link_randkey':
                 $newValue = rand(10000, 10000000);
                 break;
+            case 'link_url_title':
+                $newValue = strip_tags($newValue);
+                break;
             case 'link_status':
                 if (!in_array($newValue, $this->whitelistLinkStatuses)) {
                     throw new \InvalidArgumentException(

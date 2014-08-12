@@ -188,7 +188,7 @@ class Model
      **/
     protected function prepareAttribute($key, $value)
     {
-        return strip_tags($value);
+        return $value;
     }
 
 }

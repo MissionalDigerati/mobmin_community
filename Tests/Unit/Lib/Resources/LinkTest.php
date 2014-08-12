@@ -172,7 +172,6 @@ class LinkTest extends \PHPUnit_Framework_TestCase
         $expected = $this->linkFactory;
         $link['link_title'] = 'testSaveShouldStripTagsFromSpecificFields';
         $link['link_url_title'] = '<p>My Title With <strong>Tags</strong></p>';
-        $link['link_content'] = '<p><strong>Really Bold Content</strong></p>';
 
         $expected['link_title'] = $link['link_title'];
         $expected['link_url_title'] = 'My Title With Tags';
@@ -183,7 +182,6 @@ class LinkTest extends \PHPUnit_Framework_TestCase
         $statement = $this->db->query("SELECT * FROM " . $this->dbTablePrefix . "links WHERE link_title = 'testSaveShouldStripTagsFromSpecificFields'");
         $actual = $statement->fetchAll(\PDO::FETCH_ASSOC);
         $this->assertEquals($expected['link_url_title'], $actual[0]['link_url_title']);
-        $this->assertEquals($expected['link_content'], $actual[0]['link_content']);
     }
     /**
      * test save() sets link_randkey automatically

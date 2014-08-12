@@ -78,6 +78,6 @@ class Tag extends Model
     protected function prepareAttribute($key, $value)
     {
         $newValue = parent::prepareAttribute($key, $value);
-        return $newValue;
+        return strip_tags($newValue);
     }
 }
