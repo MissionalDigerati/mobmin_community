@@ -29,6 +29,14 @@ $libDirectory = $rootDirectory . $DS . "Lib" . $DS;
 $vendorDirectory = $rootDirectory . $DS . "Vendor" . $DS;
 $PHPToolboxDirectory = $vendorDirectory . "PHPToolbox" . $DS . "src" . $DS;
 /**
+ * SET THIS TO THE USER THAT THESE STORIES WILL BE ATTRIBUTED TO
+ */
+$pliggUsername = 'MobMin';
+/**
+ * SET THIS TO THE CATEGORY ID THAT THESE STORIES WILL BE ATTRIBUTED TO
+ */
+$pliggCategory = 1;
+/**
  * Load up the Aura
  *
  * @author Johnathan Pulos
@@ -72,6 +80,20 @@ $pgDatabase = new PDO("pgsql:dbname=" . $postGresSettings['name'] . ";host=" . $
 $statement = $pgDatabase->query("SELECT * FROM social_media");
 $data = $statement->fetchAll(\PDO::FETCH_ASSOC);
 /**
+ * Setup the mysql database
+ */
+$PDOClass = \PHPToolbox\PDODatabase\PDODatabaseConnect::getInstance();
+$PDOClass->setDatabaseSettings($dbSettings);
+$mysqlDatabase = $PDOClass->getDatabaseInstance();
+/**
+ * Grab the user who will get all the tweets attached
+ */
+$userResource = new \Resources\User($mysqlDatabase);
+$userResource->setTablePrefix($dbSettings->default['table_prefix']);
+$pliggUserData = $userResource->findByUserLogin($pliggUsername);
+print_r($pliggUserData);
+exit;
+/**
  * Iterate over all the Tweets
  */
 foreach ($data as $tweet) {
@@ -87,8 +109,6 @@ foreach ($data as $tweet) {
     $linkAuthor = $tweet['account'];
     $linkContent = $tweet['content'];
     $linkContent .= "<p class='tweet-credits'><em>Tweeted By</em>: <a href='https://twitter.com/" . $linkAuthor . "' target='_blank'>" . $linkAuthor . "</a></p>";
-    echo $linkContent;
-    break;
     $linkProviderId = $tweet['provider_id'];
     $tweetedOn = new DateTime($tweet['provider_created_datetime']);
     // echo $tweetedOn->format('Y-m-d H:i:s');
