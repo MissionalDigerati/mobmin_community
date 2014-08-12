@@ -91,8 +91,11 @@ $mysqlDatabase = $PDOClass->getDatabaseInstance();
 $userResource = new \Resources\User($mysqlDatabase);
 $userResource->setTablePrefix($dbSettings->default['table_prefix']);
 $pliggUserData = $userResource->findByUserLogin($pliggUsername);
-print_r($pliggUserData);
-exit;
+/**
+ * Instantiate the link class
+ */
+$linkResource = new \Resources\Link($mysqlDatabase, new \Resources\Tag($mysqlDatabase), new \Resources\Total($mysqlDatabase));
+$linkResource->setTablePrefix($dbSettings->default['table_prefix']);
 /**
  * Iterate over all the Tweets
  */
@@ -133,6 +136,42 @@ foreach ($data as $tweet) {
         } else {
             array_push($tweetLinks, $linkText);
         }
+    }
+    $linkCount = 1;
+    foreach ($tweetLinks as $tweetLink) {
+        $title = "MobMin Tweet by " . $linkAuthor . " on " . $tweetedOn->format('M j, Y g:i:s a');
+        if ($linkCount > 1) {
+            $title .= " #" . $linkCount;
+        }
+        $titleSlug = preg_replace('/\W+/', '-', strtolower($title));
+        $linkTags = implode(',', $tweetHashTags);
+        $linkData = array(
+            'link_author'           =>  $pliggUserData[0]['user_id'],
+            'link_status'           =>  'published',
+            'link_randkey'          =>  0,
+            'link_votes'            =>  1,
+            'link_karma'            =>  1,
+            'link_modified'         =>  '',
+            'link_date'             =>  $tweetedOn->format("Y-m-d H:i:s"),
+            'link_published_date'   =>  $tweetedOn->format("Y-m-d H:i:s"),
+            'link_category'         =>  $pliggCategory,
+            'link_url'              =>  $tweetLinks[0],
+            'link_url_title'        =>  $title,
+            'link_title'            =>  $title,
+            'link_title_url'        =>  $titleSlug,
+            'link_content'          =>  $linkContent,
+            'link_summary'          =>  '',
+            'link_tags'             =>  $linkTags,
+            'social_media_id'       =>  $linkProviderId
+        );
+        try {
+            $linkResource->save($linkData);
+            echo "Inserted the link: " . $title;
+        } catch (Exception $e) {
+            echo "There was a problem iserting link: " . $title;
+            echo "Error: " . $e->getMessage();
+        }
+        $linkCount++;
     }
 }
 
