@@ -36,7 +36,7 @@ class DatabaseSettings
      * @var array
      * @access public
      */
-    public $mysql = array(      'host'          =>  'HOST',
+    public $default = array(    'host'          =>  'HOST',
                                 'name'          =>  'DATABASE_NAME',
                                 'username'      =>  'USERNAME',
                                 'password'      =>  'PASSWORD',
