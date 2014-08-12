@@ -145,7 +145,7 @@ class Link extends Model
     public function save($data, $id = null)
     {
         if (is_null($id)) {
-            $data['link_summary'] = $this->createSummary($data['link_content']);
+            $data['link_summary'] = $data['link_content'];
             if ($saved = $this->insertRecord($data)) {
                 $this->saveTags($data);
                 $this->totalResource->increment($data['link_status']);
@@ -211,6 +211,9 @@ class Link extends Model
                     );
                     exit;
                 }
+                break;
+            case 'link_summary':
+                $newValue = $this->createSummary($newValue);
                 break;
         }
         return $newValue;
