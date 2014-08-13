@@ -110,7 +110,9 @@ foreach ($data as $tweet) {
     $dom->loadHTML($tweet['content']);
 
     $linkAuthor = $tweet['account'];
-    $linkContent = $tweet['content'];
+    $linkContent = strip_tags($tweet['content']);
+    echo strip_tags($linkContent);
+    exit;
     $linkContent .= "<p class='tweet-credits'><em>Tweeted By</em>: <a href='https://twitter.com/" . $linkAuthor . "' target='_blank'>" . $linkAuthor . "</a></p>";
     $linkProviderId = $tweet['provider_id'];
     $tweetedOn = new DateTime($tweet['provider_created_datetime']);

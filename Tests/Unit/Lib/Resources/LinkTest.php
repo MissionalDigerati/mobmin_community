@@ -148,6 +148,7 @@ class LinkTest extends \PHPUnit_Framework_TestCase
         $expected['link_url_title'] = 'testSaveShouldSaveALinkIntoTheDatabase.com';
         $expected['link_url'] = 'http://www.yahoo.com';
         $expected['social_media_id'] = 'GHFFTTY78861232';
+        $expected['social_media_account'] = 'M_Digerati';
         $linkResource = $this->setUpLinkResource();
         $linkResource->save($expected);
         $statement = $this->db->query("SELECT * FROM " . $this->dbTablePrefix . "links WHERE social_media_id = 'GHFFTTY78861232'");
@@ -156,6 +157,7 @@ class LinkTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($expected['link_url_title'], $actual[0]['link_url_title']);
         $this->assertEquals($expected['link_url'], $actual[0]['link_url']);
         $this->assertEquals($expected['social_media_id'], $actual[0]['social_media_id']);
+        $this->assertEquals($expected['social_media_account'], $actual[0]['social_media_account']);
     }
     /**
      * test that save() strips tags on specific fields
