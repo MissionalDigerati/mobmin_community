@@ -52,4 +52,5 @@ webroot/modules/upload/attachments/thumbs/*.gif
 phpunit.xml
 
 # Test files
-tests/support/DatabaseSettings.php
+Tests/Support/DatabaseSettings.php
+Config/DatabaseSettings.php

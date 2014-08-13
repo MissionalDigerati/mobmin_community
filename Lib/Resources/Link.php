@@ -56,6 +56,14 @@ class Link extends Model
      **/
     protected $primaryKey = 'link_id';
     /**
+     * If a title is to be truncated, this is the length of the title.
+     * NOTE: It truncates by words, so it may be shorter or longer.
+     *
+     * @var integer
+     * @access private
+     **/
+    private $truncatedTitleLength = 40;
+    /**
      * An array of whitelisted attributes
      *
      * @var array
@@ -64,7 +72,7 @@ class Link extends Model
     protected $accessibleAttributes = array(
         'link_author', 'link_status', 'link_randkey', 'link_votes', 'link_karma', 'link_modified', 'link_date',
         'link_published_date', 'link_category', 'link_url', 'link_url_title', 'link_title', 'link_title_url',
-        'link_content', 'link_summary', 'link_tags', 'social_media_id'
+        'link_content', 'link_summary', 'link_tags', 'social_media_id', 'social_media_account'
     );
     /**
      * A whitelist of all allowable link status
@@ -145,7 +153,12 @@ class Link extends Model
     public function save($data, $id = null)
     {
         if (is_null($id)) {
-            $data['link_summary'] = $this->createSummary($data['link_content']);
+            if ((!isset($data['link_summary'])) || ($data['link_summary'] == '')) {
+                $data['link_summary'] = $data['link_content'];
+            }
+            if ((!isset($data['link_title'])) || ($data['link_title'] == '')) {
+                $data['link_title'] = $this->createTitle($data['link_title'], $data['link_content']);
+            }
             if ($saved = $this->insertRecord($data)) {
                 $this->saveTags($data);
                 $this->totalResource->increment($data['link_status']);
@@ -201,6 +214,9 @@ class Link extends Model
             case 'link_randkey':
                 $newValue = rand(10000, 10000000);
                 break;
+            case 'link_url_title':
+                $newValue = strip_tags($newValue);
+                break;
             case 'link_status':
                 if (!in_array($newValue, $this->whitelistLinkStatuses)) {
                     throw new \InvalidArgumentException(
@@ -213,21 +229,28 @@ class Link extends Model
         return $newValue;
     }
     /**
-     * Create a snippet summary of the given link content
+     * Create a title using the given content if it is blank
      *
-     * @param string $content The current content for the link
-     * @return string The truncated summary
+     * @param string $title The current link title
+     * @param string $content The link content
+     * @return string The new title
      * @access protected
      * @author Johnathan Pulos
      **/
-    protected function createSummary($content)
+    protected function createTitle($title, $content)
     {
-        $content = strip_tags($content);
-        $contentLength = strlen($content);
-        if ($contentLength > $this->summaryLength) {
-            return substr($content, 0, $this->summaryLength);
-        } else {
-            return $content;
-        }
+        $newTitle = strip_tags($content);
+        /**
+         * Remove the URLs from the string
+         */
+        $pattern = '/\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|$!:,.;]*[A-Z0-9+&@#\/%=~_|$]/i';
+        $newTitle = preg_replace($pattern, '', $newTitle);
+        $newTitle = trim($newTitle);
+        /**
+         * Truncate the text without destroying words
+         * @link http://stackoverflow.com/a/8286096
+         */
+        $newTitle = strstr(wordwrap($newTitle, $this->truncatedTitleLength), "\n", true);
+        return $newTitle . " ...";
     }
 }
