@@ -153,7 +153,9 @@ class Link extends Model
     public function save($data, $id = null)
     {
         if (is_null($id)) {
-            $data['link_summary'] = $data['link_content'];
+            if ((!isset($data['link_summary'])) || ($data['link_summary'] == '')) {
+                $data['link_summary'] = $data['link_content'];
+            }
             if ((!isset($data['link_title'])) || ($data['link_title'] == '')) {
                 $data['link_title'] = $this->createTitle($data['link_title'], $data['link_content']);
             }

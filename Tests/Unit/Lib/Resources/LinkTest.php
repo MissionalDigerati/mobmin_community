@@ -296,6 +296,26 @@ class LinkTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($expected, $actual[0]['link_title']);
     }
     /**
+     * save() should not set link_summary to link_content if provided
+     *
+     * @return void
+     * @access public
+     * @author Johnathan Pulos
+     **/
+    public function testSaveShouldNotSetSummaryToContentIfProvided()
+    {
+        $expected = 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod';
+        $link = $this->linkFactory;
+        $link['link_summary'] = $expected;
+        $link['link_content'] = "<p>[Lore] ipsum dolor sit ametincididuntutlabore et dolore magna aliqua. Ut enim</p>";
+        $link['social_media_id'] = 'testSaveShouldNotSetSummaryToContentIfProvided';
+        $linkResource = $this->setUpLinkResource();
+        $linkResource->save($link);
+        $statement = $this->db->query("SELECT link_summary FROM " . $this->dbTablePrefix . "links WHERE social_media_id = 'testSaveShouldNotSetSummaryToContentIfProvided'");
+        $actual = $statement->fetchAll(\PDO::FETCH_ASSOC);
+        $this->assertEquals($expected, $actual[0]['link_summary']);
+    }
+    /**
      * save() should throw an error if you link_author is not set
      *
      * @return void
