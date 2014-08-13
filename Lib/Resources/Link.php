@@ -146,6 +146,7 @@ class Link extends Model
     {
         if (is_null($id)) {
             $data['link_summary'] = $data['link_content'];
+            $data['link_title'] = $this->createTitle($data['link_title'], $data['link_content']);
             if ($saved = $this->insertRecord($data)) {
                 $this->saveTags($data);
                 $this->totalResource->increment($data['link_status']);
@@ -214,5 +215,30 @@ class Link extends Model
                 break;
         }
         return $newValue;
+    }
+    /**
+     * Create a title using the given content if it is blank
+     *
+     * @param string $title The current link title
+     * @param string $content The link content
+     * @return string The new title
+     * @access protected
+     * @author Johnathan Pulos
+     **/
+    protected function createTitle($title, $content)
+    {
+        $newTitle = strip_tags($content);
+        /**
+         * Remove the URLs from the string
+         */
+        $pattern = '/\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|$!:,.;]*[A-Z0-9+&@#\/%=~_|$]/i';
+        $newTitle = preg_replace($pattern, '', $newTitle);
+        $newTitle = trim($newTitle);
+        /**
+         * Truncate the text without destroying words
+         * @link http://stackoverflow.com/a/8286096
+         */
+        $newTitle = strstr(wordwrap($newTitle, 40), "\n", true);
+        return $newTitle;
     }
 }

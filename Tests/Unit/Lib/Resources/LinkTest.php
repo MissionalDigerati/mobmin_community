@@ -146,16 +146,14 @@ class LinkTest extends \PHPUnit_Framework_TestCase
     {
         $expected = $this->linkFactory;
         $expected['link_url_title'] = 'testSaveShouldSaveALinkIntoTheDatabase.com';
-        $expected['link_title'] = 'testSaveShouldSaveALinkIntoTheDatabase';
         $expected['link_url'] = 'http://www.yahoo.com';
         $expected['social_media_id'] = 'GHFFTTY78861232';
         $linkResource = $this->setUpLinkResource();
         $linkResource->save($expected);
-        $statement = $this->db->query("SELECT * FROM " . $this->dbTablePrefix . "links WHERE link_title = 'testSaveShouldSaveALinkIntoTheDatabase'");
+        $statement = $this->db->query("SELECT * FROM " . $this->dbTablePrefix . "links WHERE social_media_id = 'GHFFTTY78861232'");
         $actual = $statement->fetchAll(\PDO::FETCH_ASSOC);
         $this->assertEquals(count($actual), 1);
         $this->assertEquals($expected['link_url_title'], $actual[0]['link_url_title']);
-        $this->assertEquals($expected['link_title'], $actual[0]['link_title']);
         $this->assertEquals($expected['link_url'], $actual[0]['link_url']);
         $this->assertEquals($expected['social_media_id'], $actual[0]['social_media_id']);
     }
@@ -170,16 +168,13 @@ class LinkTest extends \PHPUnit_Framework_TestCase
     {
         $link = $this->linkFactory;
         $expected = $this->linkFactory;
-        $link['link_title'] = 'testSaveShouldStripTagsFromSpecificFields';
         $link['link_url_title'] = '<p>My Title With <strong>Tags</strong></p>';
+        $link['social_media_id'] = 'testSaveShouldStripTagsFromSpecificFields';
 
-        $expected['link_title'] = $link['link_title'];
         $expected['link_url_title'] = 'My Title With Tags';
-        $expected['link_content'] = 'Really Bold Content';
-        $expected['link_summary'] = 'Really Emphasized Content';
         $linkResource = $this->setUpLinkResource();
         $linkResource->save($link);
-        $statement = $this->db->query("SELECT * FROM " . $this->dbTablePrefix . "links WHERE link_title = 'testSaveShouldStripTagsFromSpecificFields'");
+        $statement = $this->db->query("SELECT * FROM " . $this->dbTablePrefix . "links WHERE social_media_id = 'testSaveShouldStripTagsFromSpecificFields'");
         $actual = $statement->fetchAll(\PDO::FETCH_ASSOC);
         $this->assertEquals($expected['link_url_title'], $actual[0]['link_url_title']);
     }
@@ -193,11 +188,11 @@ class LinkTest extends \PHPUnit_Framework_TestCase
     public function testSaveShouldAutomaticallySetTheRandomLinkKey()
     {
         $expected = $this->linkFactory;
-        $expected['link_title'] = 'testSaveShouldAutomaticallySetTheRandomLinkKey';
+        $expected['social_media_id'] = 'testSaveShouldAutomaticallySetTheRandomLinkKey';
         unset($expected['link_randkey']);
         $linkResource = $this->setUpLinkResource();
         $linkResource->save($expected);
-        $statement = $this->db->query("SELECT link_randkey FROM " . $this->dbTablePrefix . "links WHERE link_title = 'testSaveShouldAutomaticallySetTheRandomLinkKey'");
+        $statement = $this->db->query("SELECT link_randkey FROM " . $this->dbTablePrefix . "links WHERE social_media_id = 'testSaveShouldAutomaticallySetTheRandomLinkKey'");
         $actual = $statement->fetchAll(\PDO::FETCH_ASSOC);
         $this->assertNotEquals(0, intval($actual[0]['link_randkey']));
     }
@@ -226,7 +221,7 @@ class LinkTest extends \PHPUnit_Framework_TestCase
     public function testSaveShouldAutomaticallyGenerateTheLinkSummary()
     {
         $link = $this->linkFactory;
-        $link['link_title'] = 'testSaveShouldAutomaticallyGenerateTheLinkSummary';
+        $link['social_media_id'] = 'testSaveShouldAutomaticallyGenerateTheLinkSummary';
         $link['link_content'] = "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor " .
             "incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco " .
             "laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate " .
@@ -235,9 +230,50 @@ class LinkTest extends \PHPUnit_Framework_TestCase
         $link['link_summary'] = '';
         $linkResource = $this->setUpLinkResource();
         $linkResource->save($link);
-        $statement = $this->db->query("SELECT link_summary FROM " . $this->dbTablePrefix . "links WHERE link_title = 'testSaveShouldAutomaticallyGenerateTheLinkSummary'");
+        $statement = $this->db->query("SELECT link_summary FROM " . $this->dbTablePrefix . "links WHERE social_media_id = 'testSaveShouldAutomaticallyGenerateTheLinkSummary'");
         $actual = $statement->fetchAll(\PDO::FETCH_ASSOC);
         $this->assertFalse($actual[0]['link_summary'] == '');
+    }
+    /**
+     * save() should auto generate the title based on the content removing elements that do not look good in the title
+     *
+     * @return void
+     * @access public
+     * @author Johnathan Pulos
+     **/
+    public function testSaveShouldGenerateATitleBasedOnTheContent()
+    {
+        $expected = '[Lore] ipsum dolor sit amet incididuntut';
+        $link = $this->linkFactory;
+        $link['link_title'] = '';
+        $link['link_content'] = "<a href='http://www.google.com'>http://t.co/adouU8Q8eE</a>[Lore] ipsum dolor sit amet" .
+        " incididuntut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco ";
+        $link['social_media_id'] = '11221212';
+        $linkResource = $this->setUpLinkResource();
+        $linkResource->save($link);
+        $statement = $this->db->query("SELECT link_title FROM " . $this->dbTablePrefix . "links WHERE social_media_id = '11221212'");
+        $actual = $statement->fetchAll(\PDO::FETCH_ASSOC);
+        $this->assertEquals($expected, $actual[0]['link_title']);
+    }
+    /**
+     * save() should not truncate a title's word even if it is over the limit
+     *
+     * @return void
+     * @access public
+     * @author Johnathan Pulos
+     **/
+    public function testSaveShouldNotTruncateTitleWords()
+    {
+        $expected = '[Lore] ipsum dolor sit';
+        $link = $this->linkFactory;
+        $link['link_title'] = '';
+        $link['link_content'] = "[Lore] ipsum dolor sit ametincididuntutlabore et dolore magna aliqua. Ut enim";
+        $link['social_media_id'] = 'testSaveShouldNotTruncateTitleWords';
+        $linkResource = $this->setUpLinkResource();
+        $linkResource->save($link);
+        $statement = $this->db->query("SELECT link_title FROM " . $this->dbTablePrefix . "links WHERE social_media_id = 'testSaveShouldNotTruncateTitleWords'");
+        $actual = $statement->fetchAll(\PDO::FETCH_ASSOC);
+        $this->assertEquals($expected, $actual[0]['link_title']);
     }
     /**
      * save() should throw an error if you link_author is not set
@@ -264,10 +300,10 @@ class LinkTest extends \PHPUnit_Framework_TestCase
     public function testGetLastIDShouldReturnTheLastInsertedId()
     {
         $link = $this->linkFactory;
-        $link['link_title'] = 'testLastIDShouldReturnTheLastInsertedId';
+        $link['social_media_id'] = 'testLastIDShouldReturnTheLastInsertedId';
         $linkResource = $this->setUpLinkResource();
         $linkResource->save($link);
-        $statement = $this->db->query("SELECT link_id FROM " . $this->dbTablePrefix . "links WHERE link_title = 'testLastIDShouldReturnTheLastInsertedId'");
+        $statement = $this->db->query("SELECT link_id FROM " . $this->dbTablePrefix . "links WHERE social_media_id = 'testLastIDShouldReturnTheLastInsertedId'");
         $savedLink = $statement->fetchAll(\PDO::FETCH_ASSOC);
         $expected = $savedLink[0]['link_id'];
 
