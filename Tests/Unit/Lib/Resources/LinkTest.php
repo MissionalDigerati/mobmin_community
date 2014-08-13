@@ -245,7 +245,7 @@ class LinkTest extends \PHPUnit_Framework_TestCase
      **/
     public function testSaveShouldGenerateATitleBasedOnTheContent()
     {
-        $expected = '[Lore] ipsum dolor sit amet incididuntut';
+        $expected = '[Lore] ipsum dolor sit amet incididuntut ...';
         $link = $this->linkFactory;
         $link['link_title'] = '';
         $link['link_content'] = "<a href='http://www.google.com'>http://t.co/adouU8Q8eE</a>[Lore] ipsum dolor sit amet" .
@@ -266,7 +266,7 @@ class LinkTest extends \PHPUnit_Framework_TestCase
      **/
     public function testSaveShouldNotTruncateTitleWords()
     {
-        $expected = '[Lore] ipsum dolor sit';
+        $expected = '[Lore] ipsum dolor sit ...';
         $link = $this->linkFactory;
         $link['link_title'] = '';
         $link['link_content'] = "[Lore] ipsum dolor sit ametincididuntutlabore et dolore magna aliqua. Ut enim";

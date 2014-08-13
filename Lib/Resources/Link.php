@@ -251,6 +251,6 @@ class Link extends Model
          * @link http://stackoverflow.com/a/8286096
          */
         $newTitle = strstr(wordwrap($newTitle, $this->truncatedTitleLength), "\n", true);
-        return $newTitle;
+        return $newTitle . " ...";
     }
 }
