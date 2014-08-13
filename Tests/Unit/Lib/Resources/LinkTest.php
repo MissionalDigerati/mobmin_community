@@ -276,6 +276,26 @@ class LinkTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($expected, $actual[0]['link_title']);
     }
     /**
+     * save() should not truncate title if you provide it
+     *
+     * @return void
+     * @access public
+     * @author Johnathan Pulos
+     **/
+    public function testSaveShouldNotTruncateIfTitleProvided()
+    {
+        $expected = 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod';
+        $link = $this->linkFactory;
+        $link['link_title'] = $expected;
+        $link['link_content'] = "[Lore] ipsum dolor sit ametincididuntutlabore et dolore magna aliqua. Ut enim";
+        $link['social_media_id'] = 'testSaveShouldNotTruncateIfTitleProvided';
+        $linkResource = $this->setUpLinkResource();
+        $linkResource->save($link);
+        $statement = $this->db->query("SELECT link_title FROM " . $this->dbTablePrefix . "links WHERE social_media_id = 'testSaveShouldNotTruncateIfTitleProvided'");
+        $actual = $statement->fetchAll(\PDO::FETCH_ASSOC);
+        $this->assertEquals($expected, $actual[0]['link_title']);
+    }
+    /**
      * save() should throw an error if you link_author is not set
      *
      * @return void

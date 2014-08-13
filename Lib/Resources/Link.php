@@ -154,7 +154,9 @@ class Link extends Model
     {
         if (is_null($id)) {
             $data['link_summary'] = $data['link_content'];
-            $data['link_title'] = $this->createTitle($data['link_title'], $data['link_content']);
+            if ((!isset($data['link_title'])) || ($data['link_title'] == '')) {
+                $data['link_title'] = $this->createTitle($data['link_title'], $data['link_content']);
+            }
             if ($saved = $this->insertRecord($data)) {
                 $this->saveTags($data);
                 $this->totalResource->increment($data['link_status']);
