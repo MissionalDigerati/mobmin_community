@@ -31,7 +31,7 @@ if(defined('mnminclude')){
     $include_in_pages = array('all');
 
     if( do_we_load_module() ) {
-        module_add_action_tpl('tpl_pligg_head_start', td_tpl_path . 'tweet_display_tpl_pligg_head_start.tpl');
+        module_add_action_tpl('tpl_pligg_head_end', td_tpl_path . 'tweet_display_tpl_pligg_head_end.tpl');
         module_add_action_tpl('tpl_pligg_story_body_start', td_tpl_path . 'tweet_display_before_story_body.tpl');
         module_add_action_tpl('tpl_pligg_story_body_end', td_tpl_path . 'tweet_display_after_story_body.tpl');
         module_add_action_tpl('tpl_pligg_story_body_start_full', td_tpl_path . 'tweet_display_before_story_body.tpl');
