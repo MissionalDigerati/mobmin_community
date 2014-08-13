@@ -111,9 +111,6 @@ foreach ($data as $tweet) {
 
     $linkAuthor = $tweet['account'];
     $linkContent = strip_tags($tweet['content']);
-    echo strip_tags($linkContent);
-    exit;
-    $linkContent .= "<p class='tweet-credits'><em>Tweeted By</em>: <a href='https://twitter.com/" . $linkAuthor . "' target='_blank'>" . $linkAuthor . "</a></p>";
     $linkProviderId = $tweet['provider_id'];
     $tweetedOn = new DateTime($tweet['provider_created_datetime']);
     // echo $tweetedOn->format('Y-m-d H:i:s');
@@ -141,11 +138,10 @@ foreach ($data as $tweet) {
     }
     $linkCount = 1;
     foreach ($tweetLinks as $tweetLink) {
-        $title = "MobMin Tweet by " . $linkAuthor . " on " . $tweetedOn->format('M j, Y g:i:s a');
+        $titleSlug = "mobmin-tweet-" . $linkProviderId;
         if ($linkCount > 1) {
-            $title .= " #" . $linkCount;
+            $titleSlug .= "-" . $linkCount;
         }
-        $titleSlug = preg_replace('/\W+/', '-', strtolower($title));
         $linkTags = implode(',', $tweetHashTags);
         $linkData = array(
             'link_author'           =>  $pliggUserData[0]['user_id'],
@@ -158,19 +154,20 @@ foreach ($data as $tweet) {
             'link_published_date'   =>  $tweetedOn->format("Y-m-d H:i:s"),
             'link_category'         =>  $pliggCategory,
             'link_url'              =>  $tweetLinks[0],
-            'link_url_title'        =>  $title,
-            'link_title'            =>  $title,
+            'link_url_title'        =>  '',
+            'link_title'            =>  '',
             'link_title_url'        =>  $titleSlug,
             'link_content'          =>  $linkContent,
             'link_summary'          =>  '',
             'link_tags'             =>  $linkTags,
-            'social_media_id'       =>  $linkProviderId
+            'social_media_id'       =>  $linkProviderId,
+            'social_media_account'  =>  $linkAuthor
         );
         try {
             $linkResource->save($linkData);
-            echo "Inserted the link: " . $title;
+            echo "Inserted the tweet from " . $linkAuthor . " tweeted on " . $tweetedOn->format("Y-m-d H:i:s") . "\r\n";
         } catch (Exception $e) {
-            echo "There was a problem iserting link: " . $title;
+            echo "There was a problem iserting from " . $linkAuthor . " tweeted on " . $tweetedOn->format("Y-m-d H:i:s") . "\r\n";
             echo "Error: " . $e->getMessage();
         }
         $linkCount++;
