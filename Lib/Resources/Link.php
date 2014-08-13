@@ -56,6 +56,14 @@ class Link extends Model
      **/
     protected $primaryKey = 'link_id';
     /**
+     * If a title is to be truncated, this is the length of the title.
+     * NOTE: It truncates by words, so it may be shorter or longer.
+     *
+     * @var integer
+     * @access private
+     **/
+    private $truncatedTitleLength = 40;
+    /**
      * An array of whitelisted attributes
      *
      * @var array
@@ -238,7 +246,7 @@ class Link extends Model
          * Truncate the text without destroying words
          * @link http://stackoverflow.com/a/8286096
          */
-        $newTitle = strstr(wordwrap($newTitle, 40), "\n", true);
+        $newTitle = strstr(wordwrap($newTitle, $this->truncatedTitleLength), "\n", true);
         return $newTitle;
     }
 }
