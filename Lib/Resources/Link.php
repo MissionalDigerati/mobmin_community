@@ -250,7 +250,9 @@ class Link extends Model
          * Truncate the text without destroying words
          * @link http://stackoverflow.com/a/8286096
          */
-        $newTitle = strstr(wordwrap($newTitle, $this->truncatedTitleLength), "\n", true);
+        if (strlen($newTitle) > $this->truncatedTitleLength) {
+            $newTitle = strstr(wordwrap($newTitle, $this->truncatedTitleLength), "\n", true);   
+        }
         return $newTitle . " ...";
     }
 }

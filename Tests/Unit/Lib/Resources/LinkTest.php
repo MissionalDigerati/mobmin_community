@@ -278,6 +278,26 @@ class LinkTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($expected, $actual[0]['link_title']);
     }
     /**
+     * save() should not truncate if the string is shorter then truncate length
+     *
+     * @return void
+     * @access public
+     * @author Johnathan Pulos
+     **/
+    public function testSaveShouldNotTruncateIfShorterThanTruncateLength()
+    {
+        $expected = '[New #mobmin Calendar Event] EMDC ...';
+        $link = $this->linkFactory;
+        $link['link_title'] = '';
+        $link['link_content'] = "[New #mobmin Calendar Event] EMDC http://t.co/nuvRR3jYhk";
+        $link['social_media_id'] = 'testSaveShouldNotTruncateIfShorterThanTruncateLength';
+        $linkResource = $this->setUpLinkResource();
+        $linkResource->save($link);
+        $statement = $this->db->query("SELECT link_title FROM " . $this->dbTablePrefix . "links WHERE social_media_id = 'testSaveShouldNotTruncateIfShorterThanTruncateLength'");
+        $actual = $statement->fetchAll(\PDO::FETCH_ASSOC);
+        $this->assertEquals($expected, $actual[0]['link_title']);
+    }
+    /**
      * save() should not truncate title if you provide it
      *
      * @return void
