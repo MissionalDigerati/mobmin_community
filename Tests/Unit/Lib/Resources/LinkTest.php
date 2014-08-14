@@ -409,6 +409,65 @@ class LinkTest extends \PHPUnit_Framework_TestCase
         $linkResource->save($link);
     }
     /**
+     * exists() Should return true if it exists
+     *
+     * @return void
+     * @access public
+     * @author Johnathan Pulos
+     **/
+    public function testExistsShouldReturnTrueIfExists()
+    {
+        $id = rand(10000, 10000000);
+        $linkResource = $this->setUpLinkResource();
+        $this->db->query("INSERT INTO " . $this->dbTablePrefix . "links (link_author, link_url, social_media_id) VALUES(1, 'http://www.google.com', " . $id . ")");
+        $exists = $linkResource->exists($id, 'social_media_id');
+        $this->assertTrue($exists);
+    }
+    /**
+     * exists() Should default column to the Models primary key
+     *
+     * @return void
+     * @access public
+     * @author Johnathan Pulos
+     **/
+    public function testExistsShouldDefaultColumnToThePrimaryKey()
+    {
+        $id = rand(10000, 10000000);
+        $linkResource = $this->setUpLinkResource();
+        $this->db->query("INSERT INTO " . $this->dbTablePrefix . "links (link_author, link_url, social_media_id) VALUES(1, 'http://www.google.com', " . $id . ")");
+        $id = $this->db->lastInsertId();
+        $exists = $linkResource->exists($id);
+        $this->assertTrue($exists);
+    }
+    /**
+     * exists() Should return false if it does not exists
+     *
+     * @return void
+     * @access public
+     * @author Johnathan Pulos
+     **/
+    public function testExistsShouldReturnFalseIfNotExists()
+    {
+        $id = rand(10000, 10000000);
+        $linkResource = $this->setUpLinkResource();
+        $exists = $linkResource->exists($id, 'social_media_id');
+        $this->assertFalse($exists);
+    }
+    /**
+     * exists() should throw an error if passed a non accessible attribute column name
+     *
+     * @return void
+     * @access public
+     * @expectedException InvalidArgumentException
+     * @author Johnathan Pulos
+     **/
+    public function testExistsShouldThrowsErrorIfColumnNotAccessible()
+    {
+        $id = rand(10000, 10000000);
+        $linkResource = $this->setUpLinkResource();
+        $exists = $linkResource->exists($id, 'made_up_column');
+    }
+    /**
      * SetUp the Link Resource, and return the object
      *
      * @param \Resources\Tag $tagObject The \Resources\Tag object (default: null)

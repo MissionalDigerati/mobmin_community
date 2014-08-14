@@ -131,7 +131,7 @@ foreach ($data as $tweet) {
         if (in_array('username', $linkClasses)) {
             array_push($tweetMentions, $linkText);
         } elseif (in_array('hashtag', $linkClasses)) {
-            array_push($tweetHashTags, $linkText);
+            array_push($tweetHashTags, ltrim($linkText, '#'));
         } else {
             array_push($tweetLinks, $linkText);
         }
@@ -153,7 +153,7 @@ foreach ($data as $tweet) {
             'link_date'             =>  $tweetedOn->format("Y-m-d H:i:s"),
             'link_published_date'   =>  $tweetedOn->format("Y-m-d H:i:s"),
             'link_category'         =>  $pliggCategory,
-            'link_url'              =>  $tweetLinks[0],
+            'link_url'              =>  $tweetLink,
             'link_url_title'        =>  '',
             'link_title'            =>  '',
             'link_title_url'        =>  $titleSlug,

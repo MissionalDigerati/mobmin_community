@@ -123,6 +123,28 @@ class Model
         }
     }
     /**
+     * Checks if the object exists
+     *
+     * @param string $value The value to look up
+     * @param string $column The column to check (default: id)
+     * @return boolean exists?
+     * @access public
+     * @author Johnathan Pulos
+     **/
+    public function exists($value, $column = null)
+    {
+        if (is_null($column)) {
+            $column = $this->primaryKey;
+        }
+        if (($column != $this->primaryKey) && (!in_array($column, $this->accessibleAttributes))) {
+            throw new \InvalidArgumentException('$column must be accessible on the Model.');
+        }
+        $stmt = $this->db->prepare("SELECT * FROM " . $this->tablePrefix . $this->tableName . " WHERE " . $column . " = :value");
+        $stmt->bindValue(":value", $value);
+        $stmt->execute();
+        return ($stmt->rowCount() > 0);
+    }
+    /**
      * Insert a new Link Resource
      *
      * @param array $data an array of the link data to save

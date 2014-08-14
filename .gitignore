@@ -54,3 +54,4 @@ phpunit.xml
 # Test files
 Tests/Support/DatabaseSettings.php
 Config/DatabaseSettings.php
+Config/TwitterSettings.php
