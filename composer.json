@@ -1,5 +1,6 @@
 {
     "require": {
-        "Aura/Autoload": "dev-master"
+        "Aura/Autoload": "dev-master",
+        "ricardoper/twitteroauth": "dev-master"
     }
 }
