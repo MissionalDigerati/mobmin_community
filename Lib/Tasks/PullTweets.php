@@ -116,4 +116,54 @@ $twitterRequest = new \TwitterOAuth\TwitterOAuth($twitterSettings->config);
  */
 $params = array('count' => 100, 'q' => urlencode($hashTagToSearch));
 $response = $twitterRequest->get('search/tweets', $params);
-var_dump($response);
+/**
+ * Iterate over all tweets, and isert into the database
+ */
+foreach ($response->statuses as $tweet) {
+    $linkProviderId = $tweet->id_str;
+    if ($linkResource->exists($linkProviderId, 'social_media_id') === false) {
+        $links = $tweet->entities->urls;
+        $tweetHashTags = array();
+        foreach ($tweet->entities->hashtags as $hashTag) {
+             array_push($tweetHashTags, $hashTag->text);
+        }
+        $tweetedOn = new DateTime($tweet->created_at);
+
+        $linkCount = 1;
+        foreach ($links as $link) {
+            $titleSlug = "mobmin-tweet-" . $linkProviderId;
+            if ($linkCount > 1) {
+                $titleSlug .= "-" . $linkCount;
+            }
+            $linkTags = implode(',', $tweetHashTags);
+            $linkData = array(
+                'link_author'           =>  $pliggUserData[0]['user_id'],
+                'link_status'           =>  'published',
+                'link_randkey'          =>  0,
+                'link_votes'            =>  1,
+                'link_karma'            =>  1,
+                'link_modified'         =>  '',
+                'link_date'             =>  $tweetedOn->format("Y-m-d H:i:s"),
+                'link_published_date'   =>  $tweetedOn->format("Y-m-d H:i:s"),
+                'link_category'         =>  $pliggCategory,
+                'link_url'              =>  $link->url,
+                'link_url_title'        =>  '',
+                'link_title'            =>  '',
+                'link_title_url'        =>  $titleSlug,
+                'link_content'          =>  $tweet->text,
+                'link_summary'          =>  '',
+                'link_tags'             =>  $linkTags,
+                'social_media_id'       =>  $linkProviderId,
+                'social_media_account'  =>  $tweet->user->screen_name
+            );
+            try {
+                $linkResource->save($linkData);
+                echo "Inserted the tweet from " . $linkData['social_media_account'] . " tweeted on " . $tweetedOn->format("Y-m-d H:i:s") . "\r\n";
+            } catch (Exception $e) {
+                echo "There was a problem iserting from " . $linkData['social_media_account'] . " tweeted on " . $tweetedOn->format("Y-m-d H:i:s") . "\r\n";
+                echo "Error: " . $e->getMessage();
+            }
+            $linkCount++;
+        }
+    }
+}
