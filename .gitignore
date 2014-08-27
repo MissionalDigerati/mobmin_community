@@ -55,3 +55,4 @@ phpunit.xml
 Tests/Support/DatabaseSettings.php
 Config/DatabaseSettings.php
 Config/TwitterSettings.php
+Config/EmbedlySettings.php
