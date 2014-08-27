@@ -90,8 +90,11 @@ $loader->add("TwitterOAuth\Exception\TwitterException", $vendorDirectory . "rica
 $loader->add("Embedly\Embedly", $vendorDirectory . "embedly" . $DS . "embedly-php" . $DS . "src");
 $embedlySettings = new \Config\EmbedlySettings();
 /**
- * Setup the Embedly API key
+ * Autoload the slugify library
  */
+$loader->setClass("Cocur\Slugify\Slugify", $vendorDirectory . "cocur" . $DS . "slugify" . $DS . "src" . $DS . "Slugify.php");
+$loader->setClass("Cocur\Slugify\SlugifyInterface", $vendorDirectory . "cocur" . $DS . "slugify" . $DS . "src" . $DS . "SlugifyInterface.php");
+$slugify = new \Cocur\Slugify\Slugify();
 /**
  * Autoload the lib classes
  *
@@ -164,6 +167,13 @@ foreach ($response->statuses as $tweet) {
                      */
                     if ($linkResource->exists($expandedLink, 'link_url') === false) {
                         $linkData = array(
+                            'link_author'           =>  $pliggUserData[0]['user_id'],
+                            'link_status'           =>  'published',
+                            'link_randkey'          =>  0,
+                            'link_votes'            =>  1,
+                            'link_karma'            =>  1,
+                            'link_modified'         =>  '',
+                            'link_category'         =>  $pliggCategory,
                             'link_date'             =>  $dateOfTweet,
                             'link_published_date'   =>  $dateOfTweet,
                             'link_url'              =>  $expandedLink,
@@ -188,3 +198,52 @@ $embedlyResults = $embedlyAPI->oembed(array('urls' =>  $linksToEmbedly));
  * $linkResources - This array holds some of the link information we need to save to the database
  * $embedlyResults - This is an array of objects providing detailed information, and embed code for each link
  */
+foreach ($linkResources as $link) {
+    foreach ($embedlyResults as $data) {
+        /**
+         * We have the links embed data
+         */
+        if ($data->url == $link['link_url']) {
+            if ($data->type == 'error') {
+                echo "This link " . $link['link_url'] . "returned an error of: " . $data->error_message . "\r\n";
+                break;
+            } else {
+                if ((property_exists($data, 'title')) && ($data->title != '')) {
+                    $link['link_title'] = strip_tags($data->title);
+                    $link['link_title_url'] = $slugify->slugify(strip_tags($data->title));
+                } else {
+                    $link['link_title'] = '';
+                    $link['link_title_url'] = uniqid("mobmin-tweet-");
+                }
+                if ((property_exists($data, 'description')) && ($data->description != '')) {
+                    $link['link_content'] = strip_tags($data->description);
+                    $link['link_summary'] = strip_tags($data->description);
+                } else {
+                    $link['link_content'] = '';
+                    $link['link_summary'] = '';
+                }
+                if ((property_exists($data, 'html')) && ($data->html != '')) {
+                    $link['link_embedly_html'] = $data->html;
+                } else {
+                    $link['link_embedly_html'] = '';
+                }
+                if ((property_exists($data, 'author_name')) && ($data->author_name != '')) {
+                    $link['link_embedly_author'] = $data->author_name;
+                } else {
+                    $link['link_embedly_author'] = '';
+                }
+                if ((property_exists($data, 'author_url')) && ($data->author_url != '')) {
+                    $link['link_embedly_author_link'] = $data->author_url;
+                } else {
+                    $link['link_embedly_author_link'] = '';
+                }
+                if ((property_exists($data, 'thumbnail_url')) && ($data->thumbnail_url != '')) {
+                    $link['link_embedly_thumb_url'] = $data->thumbnail_url;
+                } else {
+                    $link['link_embedly_thumb_url'] = '';
+                }
+                print_r($link);
+            }
+        }
+    }
+}
