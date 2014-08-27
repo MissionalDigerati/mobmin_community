@@ -212,15 +212,15 @@ foreach ($linkResources as $link) {
                     $link['link_title'] = strip_tags($data->title);
                     $link['link_title_url'] = $slugify->slugify(strip_tags($data->title));
                 } else {
-                    $link['link_title'] = '';
+                    $link['link_title'] = 'No Title Available';
                     $link['link_title_url'] = uniqid("mobmin-tweet-");
                 }
                 if ((property_exists($data, 'description')) && ($data->description != '')) {
                     $link['link_content'] = strip_tags($data->description);
                     $link['link_summary'] = strip_tags($data->description);
                 } else {
-                    $link['link_content'] = '';
-                    $link['link_summary'] = '';
+                    $link['link_content'] = '<em>No description available.</em>';
+                    $link['link_summary'] = '<em>No description available.</em>';
                 }
                 if ((property_exists($data, 'html')) && ($data->html != '')) {
                     $link['link_embedly_html'] = $data->html;
@@ -242,7 +242,18 @@ foreach ($linkResources as $link) {
                 } else {
                     $link['link_embedly_thumb_url'] = '';
                 }
-                print_r($link);
+                /**
+                 * Now save the link and break out of this loop
+                 */
+                try {
+                    $linkResource->save($link);
+                    echo "Inserted the link '" . $link['link_url'] . "' titled '" . $link['link_title'] . "'\r\n";
+                    break;
+                } catch (Exception $e) {
+                    echo "There was a problem inserting the link '" . $link['link_url'] . "' titled '" . $link['link_title'] . "'\r\n";
+                    echo "Error: " . $e->getMessage() . "\r\n";
+                    break;
+                }
             }
         }
     }
