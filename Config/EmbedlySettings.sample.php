@@ -20,7 +20,7 @@
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  * 
  */
-namespace support;
+namespace Config;
 
 /**
  * A class that holds the Embedly settings, please rename to EmbedlySettings.php
