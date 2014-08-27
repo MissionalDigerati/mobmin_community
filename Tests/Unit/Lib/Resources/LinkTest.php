@@ -50,23 +50,28 @@ class LinkTest extends \PHPUnit_Framework_TestCase
      * @access private
      **/
     private $linkFactory = array(
-        'link_author'           =>  1,
-        'link_status'           =>  'published',
-        'link_randkey'          =>  0,
-        'link_votes'            =>  1,
-        'link_karma'            =>  1,
-        'link_modified'         =>  '',
-        'link_date'             =>  '',
-        'link_published_date'   =>  '',
-        'link_category'         =>  0,
-        'link_url'              =>  'http://www.google.com',
-        'link_url_title'        =>  'Google.com',
-        'link_title'            =>  'Google',
-        'link_title_url'        =>  'www-google-com',
-        'link_content'          =>  'A great place to search for the best.',
-        'link_summary'          =>  '',
-        'link_tags'             =>  '',
-        'social_media_id'       =>  'thththrrerkekejssisisjs1221'
+        'link_author'               =>  1,
+        'link_status'               =>  'published',
+        'link_randkey'              =>  0,
+        'link_votes'                =>  1,
+        'link_karma'                =>  1,
+        'link_modified'             =>  '',
+        'link_date'                 =>  '',
+        'link_published_date'       =>  '',
+        'link_category'             =>  0,
+        'link_url'                  =>  'http://www.google.com',
+        'link_url_title'            =>  'Google.com',
+        'link_title'                =>  'Google',
+        'link_title_url'            =>  'www-google-com',
+        'link_content'              =>  'A great place to search for the best.',
+        'link_summary'              =>  '',
+        'link_tags'                 =>  '',
+        'social_media_id'           =>  'thththrrerkekejssisisjs1221',
+        'social_media_account'      =>  '',
+        'link_embedly_html'         =>  '',
+        'link_embedly_author'       =>  '',
+        'link_embedly_author_link'  =>  '',
+        'link_embedly_thumb_url'    =>  ''
     );
     /**
      * Setup the test
