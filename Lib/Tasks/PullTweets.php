@@ -66,6 +66,12 @@ $loader->add("Config\DatabaseSettings", $rootDirectory);
  */
 $loader->add("Config\TwitterSettings", $rootDirectory);
 /**
+ * Setup the Embedly settings object
+ *
+ * @author Johnathan Pulos
+ */
+$loader->add("Config\EmbedlySettings", $rootDirectory);
+/**
  * Autoload the PDO Database Class
  *
  * @author Johnathan Pulos
@@ -78,6 +84,14 @@ $loader->add("PHPToolbox\PDODatabase\PDODatabaseConnect", $PHPToolboxDirectory);
  */
 $loader->add("TwitterOAuth\TwitterOAuth", $vendorDirectory . "ricardoper" . $DS . "twitteroauth");
 $loader->add("TwitterOAuth\Exception\TwitterException", $vendorDirectory . "ricardoper" . $DS . "twitteroauth");
+/**
+ * Autoload Embedly Library
+ */
+$loader->add("Embedly\Embedly", $vendorDirectory . "embedly" . $DS . "embedly-php" . $DS . "src");
+$embedlySettings = new \Config\EmbedlySettings();
+/**
+ * Setup the Embedly API key
+ */
 /**
  * Autoload the lib classes
  *
@@ -117,53 +131,60 @@ $twitterRequest = new \TwitterOAuth\TwitterOAuth($twitterSettings->config);
 $params = array('count' => 100, 'q' => urlencode($hashTagToSearch));
 $response = $twitterRequest->get('search/tweets', $params);
 /**
+ * Arrays to hold all the links, and link data
+ */
+$linkResources = array();
+$linksToEmbedly = array();
+/**
  * Iterate over all tweets, and isert into the database
  */
 foreach ($response->statuses as $tweet) {
     $linkProviderId = $tweet->id_str;
+    $links = $tweet->entities->urls;
+    $tweetedOn = new DateTime($tweet->created_at);
+    $dateOfTweet = $tweetedOn->format("Y-m-d H:i:s");
+    $tweetHashTags = array();
+    foreach ($tweet->entities->hashtags as $hashTag) {
+         array_push($tweetHashTags, $hashTag->text);
+    }
+    $linkTags = implode(',', $tweetHashTags);
+    /**
+     * Check if the tweet has already been processed
+     */
     if ($linkResource->exists($linkProviderId, 'social_media_id') === false) {
-        $links = $tweet->entities->urls;
-        $tweetHashTags = array();
-        foreach ($tweet->entities->hashtags as $hashTag) {
-             array_push($tweetHashTags, $hashTag->text);
-        }
-        $tweetedOn = new DateTime($tweet->created_at);
-
-        $linkCount = 1;
-        foreach ($links as $link) {
-            $titleSlug = "mobmin-tweet-" . $linkProviderId;
-            if ($linkCount > 1) {
-                $titleSlug .= "-" . $linkCount;
+        if (!empty($links)) {
+            foreach ($links as $link) {
+                $expandedLink = $link->expanded_url;
+                /**
+                 * Check if the link has been processed already
+                 */
+                if (in_array($expandedLink, $linksToEmbedly) === false) {
+                    /**
+                     * Check if the link is already in the database
+                     */
+                    if ($linkResource->exists($expandedLink, 'link_url') === false) {
+                        $linkData = array(
+                            'link_date'             =>  $dateOfTweet,
+                            'link_published_date'   =>  $dateOfTweet,
+                            'link_url'              =>  $expandedLink,
+                            'link_tags'             =>  $linkTags
+                        );
+                        array_push($linkResources, $linkData);
+                        array_push($linksToEmbedly, $expandedLink);
+                    } else {
+                        /**
+                         * TODO: Apply tags to the existing link
+                         */
+                    }
+                }
             }
-            $linkTags = implode(',', $tweetHashTags);
-            $linkData = array(
-                'link_author'           =>  $pliggUserData[0]['user_id'],
-                'link_status'           =>  'published',
-                'link_randkey'          =>  0,
-                'link_votes'            =>  1,
-                'link_karma'            =>  1,
-                'link_modified'         =>  '',
-                'link_date'             =>  $tweetedOn->format("Y-m-d H:i:s"),
-                'link_published_date'   =>  $tweetedOn->format("Y-m-d H:i:s"),
-                'link_category'         =>  $pliggCategory,
-                'link_url'              =>  $link->url,
-                'link_url_title'        =>  '',
-                'link_title'            =>  '',
-                'link_title_url'        =>  $titleSlug,
-                'link_content'          =>  $tweet->text,
-                'link_summary'          =>  '',
-                'link_tags'             =>  $linkTags,
-                'social_media_id'       =>  $linkProviderId,
-                'social_media_account'  =>  $tweet->user->screen_name
-            );
-            try {
-                $linkResource->save($linkData);
-                echo "Inserted the tweet from " . $linkData['social_media_account'] . " tweeted on " . $tweetedOn->format("Y-m-d H:i:s") . "\r\n";
-            } catch (Exception $e) {
-                echo "There was a problem iserting from " . $linkData['social_media_account'] . " tweeted on " . $tweetedOn->format("Y-m-d H:i:s") . "\r\n";
-                echo "Error: " . $e->getMessage();
-            }
-            $linkCount++;
         }
     }
 }
+$embedlyAPI = new \Embedly\Embedly(array('key'   =>  $embedlySettings->APIKey));
+$embedlyResults = $embedlyAPI->oembed(array('urls' =>  $linksToEmbedly));
+/**
+ * We now have 2 arrays that we can use:
+ * $linkResources - This array holds some of the link information we need to save to the database
+ * $embedlyResults - This is an array of objects providing detailed information, and embed code for each link
+ */
