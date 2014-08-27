@@ -1,6 +1,7 @@
 {
     "require": {
         "Aura/Autoload": "dev-master",
-        "ricardoper/twitteroauth": "dev-master"
+        "ricardoper/twitteroauth": "dev-master",
+        "embedly/embedly-php": "dev-master"
     }
 }
