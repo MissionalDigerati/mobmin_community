@@ -41,6 +41,10 @@ $pliggCategory = 1;
  */
 $hashTagToSearch = '#MobMin';
 /**
+ * SET THIS TO THE MAXIMUM NUMBER OF LINKS THAT CAN BE SENT TO EMBEDLY
+ */
+$embedlyMaxLinks = 20;
+/**
  * Load up the Aura
  *
  * @author Johnathan Pulos
@@ -181,18 +185,30 @@ foreach ($response->statuses as $tweet) {
                         );
                         array_push($linkResources, $linkData);
                         array_push($linksToEmbedly, $expandedLink);
-                    } else {
-                        /**
-                         * TODO: Apply tags to the existing link
-                         */
                     }
                 }
             }
         }
     }
 }
+/**
+ * We need to break up the links into the Embedly max links link blocks, and pass them
+ */
 $embedlyAPI = new \Embedly\Embedly(array('key'   =>  $embedlySettings->APIKey));
-$embedlyResults = $embedlyAPI->oembed(array('urls' =>  $linksToEmbedly));
+$embedlyResults = array();
+echo "Expecting " . count($linksToEmbedly) . " links!\r\n";
+$linkChunks = array_chunk($linksToEmbedly, $embedlyMaxLinks);
+$chunkCount = 1;
+$totalChunks = count($linkChunks);
+foreach ($linkChunks as $linkChunk) {
+    $embedlyData = $embedlyAPI->oembed(array('urls' =>  $linkChunk));
+    foreach ($embedlyData as $key => $linkData) {
+        $linkData->original_url = $linkChunk[$key];
+        array_push($embedlyResults, $linkData);
+    }
+    echo "Completed # " . $chunkCount . " of " . $totalChunks . " total array chunks.\r\n";
+    $chunkCount++;
+}
 /**
  * We now have 2 arrays that we can use:
  * $linkResources - This array holds some of the link information we need to save to the database
@@ -203,7 +219,7 @@ foreach ($linkResources as $link) {
         /**
          * We have the links embed data
          */
-        if ($data->url == $link['link_url']) {
+        if ($data->original_url == $link['link_url']) {
             if ($data->type == 'error') {
                 echo "This link " . $link['link_url'] . "returned an error of: " . $data->error_message . "\r\n";
                 break;
