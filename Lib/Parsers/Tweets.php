@@ -128,13 +128,18 @@ class Tweets
         foreach ($response->statuses as $tweet) {
             $links = $tweet->entities->urls;
             $tweetedOn = new \DateTime($tweet->created_at);
+            $tweetHashTags = array();
+            foreach ($tweet->entities->hashtags as $hashTag) {
+                 array_push($tweetHashTags, $hashTag->text);
+            }
             foreach ($links as $link) {
                 $linkData = array(
                     "link_url"              =>  $link->expanded_url,
                     "social_media_id"       =>  $tweet->id_str,
                     "social_media_account"  =>  $tweet->user->screen_name,
                     "link_date"             =>  $tweetedOn->format("Y-m-d H:i:s"),
-                    "link_published_date"   =>  $tweetedOn->format("Y-m-d H:i:s")
+                    "link_published_date"   =>  $tweetedOn->format("Y-m-d H:i:s"),
+                    "link_tags"             =>  implode(",", $tweetHashTags)
                 );
                 $mergedLinkData = array_merge($linkData, $this->defaultLinkValues);
                 array_push($this->tweetedLinks, $mergedLinkData);

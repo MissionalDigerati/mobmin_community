@@ -170,6 +170,21 @@ class TweetsTest extends \PHPUnit_Framework_TestCase
         }
     }
     /**
+     * parseLinksFromAPI() should take all the hashtags, and turn them into tags
+     *
+     * @return void
+     * @access public
+     * @author Johnathan Pulos
+     **/
+    public function testParseLinksFromAPIShouldReturnAllLinksSeperatedWithTagsFromHashtags()
+    {
+        $expectedTags = 'mobmin,hangout';
+        $tweetsParser = $this->setupTweetsParser();
+        $linkData = $tweetsParser->parseLinksFromAPI($this->searchTweetsSingleTweetFactory);
+        $this->assertFalse(empty($linkData));
+        $this->assertEquals($expectedTags, $linkData[0]['link_tags']);
+    }
+    /**
      * Sets up a Tweets object with the given objects
      *     
      * @param \Embedly\Embedly $embedlyObj The Embedly object for retrieving link information
