@@ -110,7 +110,9 @@ class Tweets
             $links = $tweet->entities->urls;
             foreach ($links as $link) {
                 $linkData = array(
-                    "link_url"  =>  $link->expanded_url
+                    "link_url"              =>  $link->expanded_url,
+                    "social_media_id"       =>  $tweet->id_str,
+                    "social_media_account"  =>  $tweet->user->screen_name
                 );
                 array_push($this->tweetedLinks, $linkData);
             }

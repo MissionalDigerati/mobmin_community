@@ -37,6 +37,13 @@ class TweetsTest extends \PHPUnit_Framework_TestCase
      **/
     private $searchTweetsFactory;
     /**
+     * A JSON Object that represents the response of Twitter's API
+     *
+     * @var Object
+     * @access private
+     **/
+    private $searchTweetsSingleTweetFactory;
+    /**
      * Setup the testing
      *
      * @return void
@@ -48,6 +55,8 @@ class TweetsTest extends \PHPUnit_Framework_TestCase
         $DS = DIRECTORY_SEPARATOR;
         $jsonFile = __DIR__ . $DS . ".." . $DS . ".." . $DS . ".." . $DS . "Support" . $DS . "Factories" . $DS . "SearchTweets.json";
         $this->searchTweetsFactory = json_decode(file_get_contents($jsonFile));
+        $jsonFile = __DIR__ . $DS . ".." . $DS . ".." . $DS . ".." . $DS . "Support" . $DS . "Factories" . $DS . "SearchTweetsSingleTweet.json";
+        $this->searchTweetsSingleTweetFactory = json_decode(file_get_contents($jsonFile));
     }
     /**
      * __construct should throw an error if passed a non \Embedly\Embedly object for embedly
@@ -74,7 +83,7 @@ class TweetsTest extends \PHPUnit_Framework_TestCase
         $this->setupTweetsParser(null, 'Fake Slugify Object');
     }
     /**
-     * parseLinksFromAPI() should return an array for each link in the JSON object
+     * parseLinksFromAPI() should return an array with link_url set for each link in the JSON object
      *
      * @return void
      * @access public
@@ -88,7 +97,7 @@ class TweetsTest extends \PHPUnit_Framework_TestCase
             "http://yahoo.com/"
         );
         $expectedLength = count($expectedLinks);
-        $tweetsParser = $this->setupTweetsParser(null, null);
+        $tweetsParser = $this->setupTweetsParser();
         $linkData = $tweetsParser->parseLinksFromAPI($this->searchTweetsFactory);
         $links = array();
         $this->assertFalse(empty($linkData));
@@ -99,6 +108,24 @@ class TweetsTest extends \PHPUnit_Framework_TestCase
         foreach ($expectedLinks as $expectedLink) {
             $this->assertTrue(in_array($expectedLink, $links));
         }
+    }
+    /**
+     * parseLinksFromAPI() should return an array with social_media_id and social_media_account set for each link in 
+     * the JSON object
+     *
+     * @return void
+     * @access public
+     * @author Johnathan Pulos
+     **/
+    public function testParseLinksFromAPIShouldReturnAllLinksSeperatedWithSocialMediaInfo()
+    {
+        $expectedId = "505097029471961088";
+        $expectedAccount = "Mobile_Advance";
+        $tweetsParser = $this->setupTweetsParser();
+        $linkData = $tweetsParser->parseLinksFromAPI($this->searchTweetsSingleTweetFactory);
+        $this->assertFalse(empty($linkData));
+        $this->assertEquals($expectedId, $linkData[0]['social_media_id']);
+        $this->assertEquals($expectedAccount, $linkData[0]['social_media_account']);
     }
     /**
      * Sets up a Tweets object with the given objects
