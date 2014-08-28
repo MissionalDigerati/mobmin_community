@@ -128,6 +128,22 @@ class TweetsTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($expectedAccount, $linkData[0]['social_media_account']);
     }
     /**
+     * parseLinksFromAPI() should return all the links with the correct publish date
+     *
+     * @return void
+     * @access public
+     * @author Johnathan Pulos
+     **/
+    public function testParseLinksFromAPIShouldReturnAllLinksSeperatedWithCorrectDates()
+    {
+        $expectedDate = "2014-08-28 20:58:10";
+        $tweetsParser = $this->setupTweetsParser();
+        $linkData = $tweetsParser->parseLinksFromAPI($this->searchTweetsSingleTweetFactory);
+        $this->assertFalse(empty($linkData));
+        $this->assertEquals($expectedDate, $linkData[0]['link_date']);
+        $this->assertEquals($expectedDate, $linkData[0]['link_published_date']);
+    }
+    /**
      * Sets up a Tweets object with the given objects
      *     
      * @param \Embedly\Embedly $embedlyObj The Embedly object for retrieving link information
