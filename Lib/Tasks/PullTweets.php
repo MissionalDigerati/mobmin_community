@@ -196,7 +196,6 @@ foreach ($response->statuses as $tweet) {
  */
 $embedlyAPI = new \Embedly\Embedly(array('key'   =>  $embedlySettings->APIKey));
 $embedlyResults = array();
-echo "Expecting " . count($linksToEmbedly) . " links!\r\n";
 $linkChunks = array_chunk($linksToEmbedly, $embedlyMaxLinks);
 $chunkCount = 1;
 $totalChunks = count($linkChunks);
@@ -258,6 +257,7 @@ foreach ($linkResources as $link) {
                 } else {
                     $link['link_embedly_thumb_url'] = '';
                 }
+                $link['link_embedly_type'] = $data->type;
                 /**
                  * Now save the link and break out of this loop
                  */

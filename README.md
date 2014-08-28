@@ -8,7 +8,7 @@ Production Notes
 
 When setting this up for production,  your document root should be the **webroot** directory.  Code above that directory should be inaccessible!
 
-When upgrading,  make sure the links table retains the fields 'social_media_id', 'link_embedly_html', 'link_embedly_author_link', 'link_embedly_author', 'link_embedly_thumb_url' & 'social_media_account'.  This is to store the Twitter data.
+When upgrading,  make sure the links table retains the fields 'social_media_id', 'link_embedly_html', 'link_embedly_author_link', 'link_embedly_author', 'link_embedly_thumb_url', 'link_embedly_type' & 'social_media_account'.  This is to store the Twitter data.
 
 The cron job could take a while if it is processing a lot of links.  Please increase the 'max_execution_time' in your PHP.ini.
 

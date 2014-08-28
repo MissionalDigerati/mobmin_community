@@ -71,7 +71,8 @@ class LinkTest extends \PHPUnit_Framework_TestCase
         'link_embedly_html'         =>  '',
         'link_embedly_author'       =>  '',
         'link_embedly_author_link'  =>  '',
-        'link_embedly_thumb_url'    =>  ''
+        'link_embedly_thumb_url'    =>  '',
+        'link_embedly_type'         =>  ''
     );
     /**
      * Setup the test
