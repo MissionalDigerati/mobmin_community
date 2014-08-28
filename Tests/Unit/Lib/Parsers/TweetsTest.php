@@ -144,6 +144,32 @@ class TweetsTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($expectedDate, $linkData[0]['link_published_date']);
     }
     /**
+     * parseLinksFromAPI() should set the defaults for the links
+     *
+     * @return void
+     * @access public
+     * @author Johnathan Pulos
+     **/
+    public function testParseLinksFromAPIShouldReturnAllLinksSeperatedWithDefaultValues()
+    {
+        $expectedDefaults = array(
+            'link_author'   =>  1,
+            'link_status'   =>  'published',
+            'link_randkey'  =>  0,
+            'link_votes'    =>  1,
+            'link_karma'    =>  1,
+            'link_modified' =>  '',
+            'link_category' =>  1
+        );
+        $tweetsParser = $this->setupTweetsParser();
+        $tweetsParser->setDefaultLinkValues($expectedDefaults);
+        $linkData = $tweetsParser->parseLinksFromAPI($this->searchTweetsSingleTweetFactory);
+        $this->assertFalse(empty($linkData));
+        foreach ($expectedDefaults as $key => $value) {
+            $this->assertEquals($value, $linkData[0][$key]);
+        }
+    }
+    /**
      * Sets up a Tweets object with the given objects
      *     
      * @param \Embedly\Embedly $embedlyObj The Embedly object for retrieving link information

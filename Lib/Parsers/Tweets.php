@@ -49,6 +49,13 @@ class Tweets
      **/
     protected $tweetedLinks = array();
     /**
+     * An array of defaults that should be set on all arrays
+     *
+     * @var array
+     * @access protected
+     **/
+    protected $defaultLinkValues = array();
+    /**
      * Construct the class
      *
      * @param \Embedly\Embedly $embedlyObj The Embedly object for retrieving link information
@@ -61,6 +68,18 @@ class Tweets
     {
         $this->setEmbedlyObject($embedlyObj);
         $this->setSlugifyObject($slugifyObj);
+    }
+    /**
+     * Set the default values to add to all links
+     *
+     * @param array $defaults An array of default values to be added to every link
+     * @return void
+     * @access public
+     * @author Johnathan Pulos
+     **/
+    public function setDefaultLinkValues($defaults)
+    {
+        $this->defaultLinkValues = $defaults;
     }
     /**
      * Sets the $embedly class variable
@@ -117,7 +136,8 @@ class Tweets
                     "link_date"             =>  $tweetedOn->format("Y-m-d H:i:s"),
                     "link_published_date"   =>  $tweetedOn->format("Y-m-d H:i:s")
                 );
-                array_push($this->tweetedLinks, $linkData);
+                $mergedLinkData = array_merge($linkData, $this->defaultLinkValues);
+                array_push($this->tweetedLinks, $mergedLinkData);
             }
         }
         return $this->tweetedLinks;
