@@ -49,12 +49,26 @@ class Tweets
      **/
     protected $tweetedLinks = array();
     /**
+     * The data for each link retrieved by Embedly
+     *
+     * @var array
+     * @access protected
+     **/
+    protected $embedlyLinkData = array();
+    /**
      * An array of defaults that should be set on all arrays
      *
      * @var array
      * @access protected
      **/
     protected $defaultLinkValues = array();
+    /**
+     * The chunk size for Embedly links
+     *
+     * @var integer
+     * @access protected
+     **/
+    protected $chunkSize = 20;
     /**
      * Construct the class
      *
@@ -125,6 +139,7 @@ class Tweets
      **/
     public function parseLinksFromAPI($response)
     {
+        $embedlyLinks = array();
         foreach ($response->statuses as $tweet) {
             $links = $tweet->entities->urls;
             $tweetedOn = new \DateTime($tweet->created_at);
@@ -139,12 +154,64 @@ class Tweets
                     "social_media_account"  =>  $tweet->user->screen_name,
                     "link_date"             =>  $tweetedOn->format("Y-m-d H:i:s"),
                     "link_published_date"   =>  $tweetedOn->format("Y-m-d H:i:s"),
-                    "link_tags"             =>  implode(",", $tweetHashTags)
+                    "link_tags"             =>  implode(",", $tweetHashTags),
+                    "link_title" => ""
                 );
                 $mergedLinkData = array_merge($linkData, $this->defaultLinkValues);
                 array_push($this->tweetedLinks, $mergedLinkData);
+                array_push($embedlyLinks, $mergedLinkData['link_url']);
             }
         }
+        if (!empty($embedlyLinks)) {
+            $this->getEmbedlyData($embedlyLinks);
+            $this->combineLinksWithEmbedlyData();
+        }
         return $this->tweetedLinks;
+    }
+    /**
+     * Grab the Embedly data for the links.  This method breaks the array into chunks, since Embedly restricts the total
+     * results.  It will also append an original_url on embedlyLinkData class var to match the link_url to grab it's data.
+     *
+     * @param array $links An array of links to parse
+     * @return object The data for each link
+     * @access protected
+     * @author Johnathan Pulos
+     **/
+    protected function getEmbedlyData($links)
+    {
+        $chunks = array_chunk($links, $this->chunkSize);
+        $chunkCount = 1;
+        foreach ($chunks as $chunk) {
+            $data = $this->embedly->oembed(array('urls' =>  $chunk));
+            foreach ($data as $key => $linkData) {
+                $linkData->original_url = $chunk[$key];
+                array_push($this->embedlyLinkData, $linkData);
+            }
+            $chunkCount++;
+        }
+    }
+    /**
+     * Takes the current Embedly data (embedlyLinkData class var), and merges it with the the links (tweetedLinks class var)
+     *
+     * @return void
+     * @access protected
+     * @author Johnathan Pulos
+     **/
+    protected function combineLinksWithEmbedlyData()
+    {
+        foreach ($this->tweetedLinks as $linkKey => $link) {
+            foreach ($this->embedlyLinkData as $data) {
+                /**
+                 * We have the correct data for the link
+                 */
+                if ($data->original_url == $link['link_url']) {
+                    if ((property_exists($data, 'title')) && ($data->title != '')) {
+                        $this->tweetedLinks[$linkKey]['link_title'] = strip_tags($data->title);
+                    } else {
+                        $this->tweetedLinks[$linkKey]['link_title'] = 'No Title Available';
+                    }
+                }
+            }
+        }
     }
 }

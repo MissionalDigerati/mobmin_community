@@ -185,6 +185,49 @@ class TweetsTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($expectedTags, $linkData[0]['link_tags']);
     }
     /**
+     * parseLinksFromAPI() should get the link_title from the Embedly returned data
+     *
+     * @return void
+     * @access public
+     * @author Johnathan Pulos
+     **/
+    public function testParseLinksFromAPIShouldSetLinkTitleBasedOnEmbedlyData()
+    {
+        $expectedTitle = 'An Unexpectant Place';
+        $returnedObject = new \stdClass();
+        $returnedObject->title = $expectedTitle;
+        $embedlyObj = $this->getMock('\Embedly\Embedly', array('oembed'), array());
+        $embedlyObj->expects($this->exactly(1))
+                    ->method('oembed')
+                    ->with(array('urls' =>  array('http://weadapt.org/knowledge-base/improving-access-to-climate-adaptation-information/mwash')))
+                    ->will($this->returnValue(array($returnedObject)));
+        $tweetsParser = $this->setupTweetsParser($embedlyObj);
+        $linkData = $tweetsParser->parseLinksFromAPI($this->searchTweetsSingleTweetFactory);
+        $this->assertFalse(empty($linkData));
+        $this->assertEquals($expectedTitle, $linkData[0]['link_title']);
+    }
+    /**
+     * parseLinksFromAPI() should set the link_title to a default if the Embedly returned data does not set it
+     *
+     * @return void
+     * @access public
+     * @author Johnathan Pulos
+     **/
+    public function testParseLinksFromAPIShouldSetADefaultLinkTitleBasedOnEmbedlyData()
+    {
+        $expectedTitle = 'No Title Available';
+        $returnedObject = new \stdClass();
+        $embedlyObj = $this->getMock('\Embedly\Embedly', array('oembed'), array());
+        $embedlyObj->expects($this->exactly(1))
+                    ->method('oembed')
+                    ->with(array('urls' =>  array('http://weadapt.org/knowledge-base/improving-access-to-climate-adaptation-information/mwash')))
+                    ->will($this->returnValue(array($returnedObject)));
+        $tweetsParser = $this->setupTweetsParser($embedlyObj);
+        $linkData = $tweetsParser->parseLinksFromAPI($this->searchTweetsSingleTweetFactory);
+        $this->assertFalse(empty($linkData));
+        $this->assertEquals($expectedTitle, $linkData[0]['link_title']);
+    }
+    /**
      * Sets up a Tweets object with the given objects
      *     
      * @param \Embedly\Embedly $embedlyObj The Embedly object for retrieving link information
@@ -197,6 +240,7 @@ class TweetsTest extends \PHPUnit_Framework_TestCase
     {
         if (is_null($embedlyObj)) {
             $embedlyObj = $this->getMock('\Embedly\Embedly', array('oembed'), array());
+            $embedlyObj->method('oembed')->will($this->returnValue(array()));
         }
         if (is_null($slugifyObj)) {
             $slugifyObj = $this->getMock('\Cocur\Slugify\Slugify', array('slugify'));
