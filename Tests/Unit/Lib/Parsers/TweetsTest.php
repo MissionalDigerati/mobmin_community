@@ -494,6 +494,28 @@ class TweetsTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($expectedContent, $linkData[0]['link_embedly_thumb_url']);
     }
     /**
+     * parseLinksFromAPI() should set the link_embedly_type to the type provided by Embedly
+     *
+     * @return void
+     * @access public
+     * @author Johnathan Pulos
+     **/
+    public function testParseLinksFromAPIShouldSetTheLinkTypeToEmbedlysType()
+    {
+        $expectedContent = "video";
+        $returnedObject = new \stdClass();
+        $returnedObject->type = $expectedContent;
+        $embedlyObj = $this->getMock('\Embedly\Embedly', array('oembed'), array());
+        $embedlyObj->expects($this->exactly(1))
+                    ->method('oembed')
+                    ->with(array('urls' =>  array('http://weadapt.org/knowledge-base/improving-access-to-climate-adaptation-information/mwash')))
+                    ->will($this->returnValue(array($returnedObject)));
+        $tweetsParser = $this->setupTweetsParser($embedlyObj);
+        $linkData = $tweetsParser->parseLinksFromAPI($this->searchTweetsSingleTweetFactory);
+        $this->assertFalse(empty($linkData));
+        $this->assertEquals($expectedContent, $linkData[0]['link_embedly_type']);
+    }
+    /**
      * Sets up a Tweets object with the given objects
      *     
      * @param \Embedly\Embedly $embedlyObj The Embedly object for retrieving link information

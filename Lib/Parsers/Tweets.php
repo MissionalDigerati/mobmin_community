@@ -240,6 +240,11 @@ class Tweets
                     } else {
                         $this->tweetedLinks[$linkKey]['link_embedly_thumb_url'] = '';
                     }
+                    if ((property_exists($data, 'type')) && ($data->type != '')) {
+                        $this->tweetedLinks[$linkKey]['link_embedly_type'] = $data->type;
+                    } else {
+                        $this->tweetedLinks[$linkKey]['link_embedly_type'] = 'link';
+                    }
                 }
             }
         }
