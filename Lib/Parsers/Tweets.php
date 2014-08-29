@@ -154,8 +154,7 @@ class Tweets
                     "social_media_account"  =>  $tweet->user->screen_name,
                     "link_date"             =>  $tweetedOn->format("Y-m-d H:i:s"),
                     "link_published_date"   =>  $tweetedOn->format("Y-m-d H:i:s"),
-                    "link_tags"             =>  implode(",", $tweetHashTags),
-                    "link_content" => ""
+                    "link_tags"             =>  implode(",", $tweetHashTags)
                 );
                 $mergedLinkData = array_merge($linkData, $this->defaultLinkValues);
                 array_push($this->tweetedLinks, $mergedLinkData);
@@ -220,6 +219,11 @@ class Tweets
                     } else {
                         $this->tweetedLinks[$linkKey]['link_content'] = 'No description available.';
                         $this->tweetedLinks[$linkKey]['link_summary'] = 'No description available.';
+                    }
+                    if ((property_exists($data, 'html')) && ($data->html != '')) {
+                        $this->tweetedLinks[$linkKey]['link_embedly_html'] = $data->html;
+                    } else {
+                        $this->tweetedLinks[$linkKey]['link_embedly_html'] = '';
                     }
                 }
             }
