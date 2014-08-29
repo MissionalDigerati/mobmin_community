@@ -225,6 +225,11 @@ class Tweets
                     } else {
                         $this->tweetedLinks[$linkKey]['link_embedly_html'] = '';
                     }
+                    if ((property_exists($data, 'author_name')) && ($data->author_name != '')) {
+                        $this->tweetedLinks[$linkKey]['link_embedly_author'] = $data->author_name;
+                    } else {
+                        $this->tweetedLinks[$linkKey]['link_embedly_author'] = '';
+                    }
                 }
             }
         }
