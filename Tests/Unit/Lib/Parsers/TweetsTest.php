@@ -408,6 +408,49 @@ class TweetsTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($expectedContent, $linkData[0]['link_embedly_author']);
     }
     /**
+     * parseLinksFromAPI() should set the link_embedly_author_link to the author_url provided by Embedly
+     *
+     * @return void
+     * @access public
+     * @author Johnathan Pulos
+     **/
+    public function testParseLinksFromAPIShouldSetTheLinkAuthorLinkToEmbedlysAuthorURL()
+    {
+        $expectedContent = "http://www.mypage.com";
+        $returnedObject = new \stdClass();
+        $returnedObject->author_url = $expectedContent;
+        $embedlyObj = $this->getMock('\Embedly\Embedly', array('oembed'), array());
+        $embedlyObj->expects($this->exactly(1))
+                    ->method('oembed')
+                    ->with(array('urls' =>  array('http://weadapt.org/knowledge-base/improving-access-to-climate-adaptation-information/mwash')))
+                    ->will($this->returnValue(array($returnedObject)));
+        $tweetsParser = $this->setupTweetsParser($embedlyObj);
+        $linkData = $tweetsParser->parseLinksFromAPI($this->searchTweetsSingleTweetFactory);
+        $this->assertFalse(empty($linkData));
+        $this->assertEquals($expectedContent, $linkData[0]['link_embedly_author_link']);
+    }
+    /**
+     * parseLinksFromAPI() should set the link_embedly_author_link to an empty string if no author_url provided by Embedly
+     *
+     * @return void
+     * @access public
+     * @author Johnathan Pulos
+     **/
+    public function testParseLinksFromAPIShouldSetTheLinkAuthorLinkToEmptyIfNoEmbedlysAuthorURL()
+    {
+        $expectedContent = "";
+        $returnedObject = new \stdClass();
+        $embedlyObj = $this->getMock('\Embedly\Embedly', array('oembed'), array());
+        $embedlyObj->expects($this->exactly(1))
+                    ->method('oembed')
+                    ->with(array('urls' =>  array('http://weadapt.org/knowledge-base/improving-access-to-climate-adaptation-information/mwash')))
+                    ->will($this->returnValue(array($returnedObject)));
+        $tweetsParser = $this->setupTweetsParser($embedlyObj);
+        $linkData = $tweetsParser->parseLinksFromAPI($this->searchTweetsSingleTweetFactory);
+        $this->assertFalse(empty($linkData));
+        $this->assertEquals($expectedContent, $linkData[0]['link_embedly_author_link']);
+    }
+    /**
      * Sets up a Tweets object with the given objects
      *     
      * @param \Embedly\Embedly $embedlyObj The Embedly object for retrieving link information
