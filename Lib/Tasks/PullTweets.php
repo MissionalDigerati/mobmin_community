@@ -109,6 +109,7 @@ $loader->add("Resources\Link", $libDirectory);
 $loader->add("Resources\Tag", $libDirectory);
 $loader->add("Resources\Total", $libDirectory);
 $loader->add("Resources\User", $libDirectory);
+$loader->add("Parsers\Tweets", $libDirectory);
 /**
  * Setup the mysql database
  */
@@ -137,139 +138,49 @@ $twitterRequest = new \TwitterOAuth\TwitterOAuth($twitterSettings->config);
  */
 $params = array('count' => 100, 'q' => urlencode($hashTagToSearch));
 $response = $twitterRequest->get('search/tweets', $params);
+$filteredResponse = $response;
 /**
- * Arrays to hold all the links, and link data
+ * Let's filter the response, so we do not overburden Embedly
  */
-$linkResources = array();
-$linksToEmbedly = array();
-/**
- * Iterate over all tweets, and isert into the database
- */
-foreach ($response->statuses as $tweet) {
+foreach ($response->statuses as $key => $tweet) {
     $linkProviderId = $tweet->id_str;
-    $links = $tweet->entities->urls;
-    $tweetedOn = new DateTime($tweet->created_at);
-    $dateOfTweet = $tweetedOn->format("Y-m-d H:i:s");
-    $tweetHashTags = array();
-    foreach ($tweet->entities->hashtags as $hashTag) {
-         array_push($tweetHashTags, $hashTag->text);
-    }
-    $linkTags = implode(',', $tweetHashTags);
     /**
-     * Check if the tweet has already been processed
+     * Have we parsed this tweet?
      */
-    if ($linkResource->exists($linkProviderId, 'social_media_id') === false) {
-        if (!empty($links)) {
-            foreach ($links as $link) {
-                $expandedLink = $link->expanded_url;
-                /**
-                 * Check if the link has been processed already
-                 */
-                if (in_array($expandedLink, $linksToEmbedly) === false) {
-                    /**
-                     * Check if the link is already in the database
-                     */
-                    if ($linkResource->exists($expandedLink, 'link_url') === false) {
-                        $linkData = array(
-                            'link_author'           =>  $pliggUserData[0]['user_id'],
-                            'link_status'           =>  'published',
-                            'link_randkey'          =>  0,
-                            'link_votes'            =>  1,
-                            'link_karma'            =>  1,
-                            'link_modified'         =>  '',
-                            'link_category'         =>  $pliggCategory,
-                            'link_date'             =>  $dateOfTweet,
-                            'link_published_date'   =>  $dateOfTweet,
-                            'link_url'              =>  $expandedLink,
-                            'link_tags'             =>  $linkTags
-                        );
-                        array_push($linkResources, $linkData);
-                        array_push($linksToEmbedly, $expandedLink);
-                    }
-                }
-            }
-        }
+    if ($linkResource->exists($linkProviderId, 'social_media_id') === true) {
+        unset($filteredResponse->statuses[$key]);
     }
 }
 /**
- * We need to break up the links into the Embedly max links link blocks, and pass them
+ * Now intialize the parser, and have it prepare all the links for the database
  */
 $embedlyAPI = new \Embedly\Embedly(array('key'   =>  $embedlySettings->APIKey));
-$embedlyResults = array();
-$linkChunks = array_chunk($linksToEmbedly, $embedlyMaxLinks);
-$chunkCount = 1;
-$totalChunks = count($linkChunks);
-foreach ($linkChunks as $linkChunk) {
-    $embedlyData = $embedlyAPI->oembed(array('urls' =>  $linkChunk));
-    foreach ($embedlyData as $key => $linkData) {
-        $linkData->original_url = $linkChunk[$key];
-        array_push($embedlyResults, $linkData);
-    }
-    echo "Completed # " . $chunkCount . " of " . $totalChunks . " total array chunks.\r\n";
-    $chunkCount++;
-}
-/**
- * We now have 2 arrays that we can use:
- * $linkResources - This array holds some of the link information we need to save to the database
- * $embedlyResults - This is an array of objects providing detailed information, and embed code for each link
- */
-foreach ($linkResources as $link) {
-    foreach ($embedlyResults as $data) {
-        /**
-         * We have the links embed data
-         */
-        if ($data->original_url == $link['link_url']) {
-            if ($data->type == 'error') {
-                echo "This link " . $link['link_url'] . "returned an error of: " . $data->error_message . "\r\n";
-                break;
-            } else {
-                if ((property_exists($data, 'title')) && ($data->title != '')) {
-                    $link['link_title'] = strip_tags($data->title);
-                    $link['link_title_url'] = $slugify->slugify(strip_tags($data->title));
-                } else {
-                    $link['link_title'] = 'No Title Available';
-                    $link['link_title_url'] = uniqid("mobmin-tweet-");
-                }
-                if ((property_exists($data, 'description')) && ($data->description != '')) {
-                    $link['link_content'] = strip_tags($data->description);
-                    $link['link_summary'] = strip_tags($data->description);
-                } else {
-                    $link['link_content'] = '<em>No description available.</em>';
-                    $link['link_summary'] = '<em>No description available.</em>';
-                }
-                if ((property_exists($data, 'html')) && ($data->html != '')) {
-                    $link['link_embedly_html'] = $data->html;
-                } else {
-                    $link['link_embedly_html'] = '';
-                }
-                if ((property_exists($data, 'author_name')) && ($data->author_name != '')) {
-                    $link['link_embedly_author'] = $data->author_name;
-                } else {
-                    $link['link_embedly_author'] = '';
-                }
-                if ((property_exists($data, 'author_url')) && ($data->author_url != '')) {
-                    $link['link_embedly_author_link'] = $data->author_url;
-                } else {
-                    $link['link_embedly_author_link'] = '';
-                }
-                if ((property_exists($data, 'thumbnail_url')) && ($data->thumbnail_url != '')) {
-                    $link['link_embedly_thumb_url'] = $data->thumbnail_url;
-                } else {
-                    $link['link_embedly_thumb_url'] = '';
-                }
-                $link['link_embedly_type'] = $data->type;
-                /**
-                 * Now save the link and break out of this loop
-                 */
-                try {
-                    $linkResource->save($link);
-                    echo "Inserted the link '" . $link['link_url'] . "' titled '" . $link['link_title'] . "'\r\n";
-                    break;
-                } catch (Exception $e) {
-                    echo "There was a problem inserting the link '" . $link['link_url'] . "' titled '" . $link['link_title'] . "'\r\n";
-                    echo "Error: " . $e->getMessage() . "\r\n";
-                    break;
-                }
+$parser = new \Parsers\Tweets($embedlyAPI, $slugify);
+$defaults =  array(
+    'link_author'   =>  $pliggUserData[0]['user_id'],
+    'link_status'   =>  'published',
+    'link_randkey'  =>  0,
+    'link_votes'    =>  1,
+    'link_karma'    =>  1,
+    'link_modified' =>  '',
+    'link_category' =>  $pliggCategory
+);
+$parser->setDefaultLinkValues($defaults);
+$links = $parser->parseLinksFromAPI($filteredResponse);
+foreach ($links as $link) {
+    if ($linkResource->exists($link['link_url'], 'link_url') === false) {
+        if ($link['link_embedly_type'] == 'error') {
+            echo "This link " . $link['link_url'] . " returned an error.\r\n";
+        } else {
+            /**
+             * Now save the link and break out of this loop
+             */
+            try {
+                $linkResource->save($link);
+                echo "Inserted the link '" . $link['link_url'] . "' titled '" . $link['link_title'] . "'\r\n";
+            } catch (Exception $e) {
+                echo "There was a problem inserting the link '" . $link['link_url'] . "' titled '" . $link['link_title'] . "'\r\n";
+                echo "Error: " . $e->getMessage() . "\r\n";
             }
         }
     }
