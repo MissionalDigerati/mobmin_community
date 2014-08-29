@@ -228,6 +228,55 @@ class TweetsTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($expectedTitle, $linkData[0]['link_title']);
     }
     /**
+     * parseLinksFromAPI() should get the link_title_url based on the title provided from the Embedly returned data
+     *
+     * @return void
+     * @access public
+     * @author Johnathan Pulos
+     **/
+    public function testParseLinksFromAPIShouldSetLinkTitleURLBasedOnEmbedlyData()
+    {
+        $expectedURL = 'an-unexpectant-place';
+        $returnedObject = new \stdClass();
+        $returnedObject->title = 'An Unexpectant Place';
+        $embedlyObj = $this->getMock('\Embedly\Embedly', array('oembed'), array());
+        $embedlyObj->expects($this->exactly(1))
+                    ->method('oembed')
+                    ->with(array('urls' =>  array('http://weadapt.org/knowledge-base/improving-access-to-climate-adaptation-information/mwash')))
+                    ->will($this->returnValue(array($returnedObject)));
+        $slugifyObj = $this->getMock('\Cocur\Slugify\Slugify', array('slugify'));
+        $slugifyObj->expects($this->exactly(1))
+                    ->method('slugify')
+                    ->with('An Unexpectant Place')
+                    ->will($this->returnValue($expectedURL));
+        $tweetsParser = $this->setupTweetsParser($embedlyObj, $slugifyObj);
+        $linkData = $tweetsParser->parseLinksFromAPI($this->searchTweetsSingleTweetFactory);
+        $this->assertFalse(empty($linkData));
+        $this->assertEquals($expectedURL, $linkData[0]['link_title_url']);
+    }
+    /**
+     * parseLinksFromAPI() should generate a UUID for the link_title_url if title is missing from Embedly
+     *
+     * @return void
+     * @access public
+     * @author Johnathan Pulos
+     **/
+    public function testParseLinksFromAPIShouldSetLinkTitleURLToAUUIDIfTitleIsUnavailableFromEmbedly()
+    {
+        $returnedObject = new \stdClass();
+        $embedlyObj = $this->getMock('\Embedly\Embedly', array('oembed'), array());
+        $embedlyObj->expects($this->exactly(1))
+                    ->method('oembed')
+                    ->with(array('urls' =>  array('http://weadapt.org/knowledge-base/improving-access-to-climate-adaptation-information/mwash')))
+                    ->will($this->returnValue(array($returnedObject)));
+        $slugifyObj = $this->getMock('\Cocur\Slugify\Slugify', array('slugify'));
+        $slugifyObj->expects($this->exactly(0))->method('slugify');
+        $tweetsParser = $this->setupTweetsParser($embedlyObj, $slugifyObj);
+        $linkData = $tweetsParser->parseLinksFromAPI($this->searchTweetsSingleTweetFactory);
+        $this->assertFalse(empty($linkData));
+        $this->assertNotEquals('', $linkData[0]['link_title_url']);
+    }
+    /**
      * Sets up a Tweets object with the given objects
      *     
      * @param \Embedly\Embedly $embedlyObj The Embedly object for retrieving link information

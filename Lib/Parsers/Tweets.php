@@ -155,7 +155,7 @@ class Tweets
                     "link_date"             =>  $tweetedOn->format("Y-m-d H:i:s"),
                     "link_published_date"   =>  $tweetedOn->format("Y-m-d H:i:s"),
                     "link_tags"             =>  implode(",", $tweetHashTags),
-                    "link_title" => ""
+                    "link_title_url" => ""
                 );
                 $mergedLinkData = array_merge($linkData, $this->defaultLinkValues);
                 array_push($this->tweetedLinks, $mergedLinkData);
@@ -206,9 +206,12 @@ class Tweets
                  */
                 if ($data->original_url == $link['link_url']) {
                     if ((property_exists($data, 'title')) && ($data->title != '')) {
-                        $this->tweetedLinks[$linkKey]['link_title'] = strip_tags($data->title);
+                        $title = strip_tags($data->title);
+                        $this->tweetedLinks[$linkKey]['link_title'] = $title;
+                        $this->tweetedLinks[$linkKey]['link_title_url'] = $this->slugify->slugify($title);
                     } else {
                         $this->tweetedLinks[$linkKey]['link_title'] = 'No Title Available';
+                        $this->tweetedLinks[$linkKey]['link_title_url'] = uniqid("mobmin-tweet-");
                     }
                 }
             }
