@@ -41,6 +41,10 @@ $pliggCategory = 1;
  */
 $hashTagToSearch = '#MobMin';
 /**
+ * SET THIS TO THE MAXIMUM NUMBER OF LINKS THAT CAN BE SENT TO EMBEDLY
+ */
+$embedlyMaxLinks = 20;
+/**
  * Load up the Aura
  *
  * @author Johnathan Pulos
@@ -66,6 +70,12 @@ $loader->add("Config\DatabaseSettings", $rootDirectory);
  */
 $loader->add("Config\TwitterSettings", $rootDirectory);
 /**
+ * Setup the Embedly settings object
+ *
+ * @author Johnathan Pulos
+ */
+$loader->add("Config\EmbedlySettings", $rootDirectory);
+/**
  * Autoload the PDO Database Class
  *
  * @author Johnathan Pulos
@@ -79,6 +89,17 @@ $loader->add("PHPToolbox\PDODatabase\PDODatabaseConnect", $PHPToolboxDirectory);
 $loader->add("TwitterOAuth\TwitterOAuth", $vendorDirectory . "ricardoper" . $DS . "twitteroauth");
 $loader->add("TwitterOAuth\Exception\TwitterException", $vendorDirectory . "ricardoper" . $DS . "twitteroauth");
 /**
+ * Autoload Embedly Library
+ */
+$loader->add("Embedly\Embedly", $vendorDirectory . "embedly" . $DS . "embedly-php" . $DS . "src");
+$embedlySettings = new \Config\EmbedlySettings();
+/**
+ * Autoload the slugify library
+ */
+$loader->setClass("Cocur\Slugify\Slugify", $vendorDirectory . "cocur" . $DS . "slugify" . $DS . "src" . $DS . "Slugify.php");
+$loader->setClass("Cocur\Slugify\SlugifyInterface", $vendorDirectory . "cocur" . $DS . "slugify" . $DS . "src" . $DS . "SlugifyInterface.php");
+$slugify = new \Cocur\Slugify\Slugify();
+/**
  * Autoload the lib classes
  *
  * @author Johnathan Pulos
@@ -88,6 +109,7 @@ $loader->add("Resources\Link", $libDirectory);
 $loader->add("Resources\Tag", $libDirectory);
 $loader->add("Resources\Total", $libDirectory);
 $loader->add("Resources\User", $libDirectory);
+$loader->add("Parsers\Tweets", $libDirectory);
 /**
  * Setup the mysql database
  */
@@ -116,54 +138,50 @@ $twitterRequest = new \TwitterOAuth\TwitterOAuth($twitterSettings->config);
  */
 $params = array('count' => 100, 'q' => urlencode($hashTagToSearch));
 $response = $twitterRequest->get('search/tweets', $params);
+$filteredResponse = $response;
 /**
- * Iterate over all tweets, and isert into the database
+ * Let's filter the response, so we do not overburden Embedly
  */
-foreach ($response->statuses as $tweet) {
+foreach ($response->statuses as $key => $tweet) {
     $linkProviderId = $tweet->id_str;
-    if ($linkResource->exists($linkProviderId, 'social_media_id') === false) {
-        $links = $tweet->entities->urls;
-        $tweetHashTags = array();
-        foreach ($tweet->entities->hashtags as $hashTag) {
-             array_push($tweetHashTags, $hashTag->text);
-        }
-        $tweetedOn = new DateTime($tweet->created_at);
-
-        $linkCount = 1;
-        foreach ($links as $link) {
-            $titleSlug = "mobmin-tweet-" . $linkProviderId;
-            if ($linkCount > 1) {
-                $titleSlug .= "-" . $linkCount;
-            }
-            $linkTags = implode(',', $tweetHashTags);
-            $linkData = array(
-                'link_author'           =>  $pliggUserData[0]['user_id'],
-                'link_status'           =>  'published',
-                'link_randkey'          =>  0,
-                'link_votes'            =>  1,
-                'link_karma'            =>  1,
-                'link_modified'         =>  '',
-                'link_date'             =>  $tweetedOn->format("Y-m-d H:i:s"),
-                'link_published_date'   =>  $tweetedOn->format("Y-m-d H:i:s"),
-                'link_category'         =>  $pliggCategory,
-                'link_url'              =>  $link->url,
-                'link_url_title'        =>  '',
-                'link_title'            =>  '',
-                'link_title_url'        =>  $titleSlug,
-                'link_content'          =>  $tweet->text,
-                'link_summary'          =>  '',
-                'link_tags'             =>  $linkTags,
-                'social_media_id'       =>  $linkProviderId,
-                'social_media_account'  =>  $tweet->user->screen_name
-            );
+    /**
+     * Have we parsed this tweet?
+     */
+    if ($linkResource->exists($linkProviderId, 'social_media_id') === true) {
+        unset($filteredResponse->statuses[$key]);
+    }
+}
+/**
+ * Now intialize the parser, and have it prepare all the links for the database
+ */
+$embedlyAPI = new \Embedly\Embedly(array('key'   =>  $embedlySettings->APIKey));
+$parser = new \Parsers\Tweets($embedlyAPI, $slugify);
+$defaults =  array(
+    'link_author'   =>  $pliggUserData[0]['user_id'],
+    'link_status'   =>  'published',
+    'link_randkey'  =>  0,
+    'link_votes'    =>  0,
+    'link_karma'    =>  0,
+    'link_modified' =>  '',
+    'link_category' =>  $pliggCategory
+);
+$parser->setDefaultLinkValues($defaults);
+$links = $parser->parseLinksFromAPI($filteredResponse);
+foreach ($links as $link) {
+    if ($linkResource->exists($link['link_url'], 'link_url') === false) {
+        if ($link['link_embedly_type'] == 'error') {
+            echo "This link " . $link['link_url'] . " returned an error.\r\n";
+        } else {
+            /**
+             * Now save the link and break out of this loop
+             */
             try {
-                $linkResource->save($linkData);
-                echo "Inserted the tweet from " . $linkData['social_media_account'] . " tweeted on " . $tweetedOn->format("Y-m-d H:i:s") . "\r\n";
+                $linkResource->save($link);
+                echo "Inserted the link '" . $link['link_url'] . "' titled '" . $link['link_title'] . "'\r\n";
             } catch (Exception $e) {
-                echo "There was a problem iserting from " . $linkData['social_media_account'] . " tweeted on " . $tweetedOn->format("Y-m-d H:i:s") . "\r\n";
-                echo "Error: " . $e->getMessage();
+                echo "There was a problem inserting the link '" . $link['link_url'] . "' titled '" . $link['link_title'] . "'\r\n";
+                echo "Error: " . $e->getMessage() . "\r\n";
             }
-            $linkCount++;
         }
     }
 }
