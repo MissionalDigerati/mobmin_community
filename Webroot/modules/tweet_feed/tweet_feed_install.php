@@ -40,14 +40,14 @@ $module_info['db_add_table'][]=array(
 );
 // Add new table
 $module_info['db_add_table'][]=array(
-    'name' => table_prefix . "tweet_avatars",
-    'sql' => "CREATE TABLE `".table_prefix . "tweet_avatars` (
-      `tweet_avatar_id` int(11) NOT NULL auto_increment,
+    'name' => table_prefix . "tweet_feed_avatars",
+    'sql' => "CREATE TABLE `".table_prefix . "tweet_feed_avatars` (
+      `tweet_feed_avatar_id` int(11) NOT NULL auto_increment,
       `tweeter_id` varchar(255),
       `tweeter_name` varchar(255),
       `tweeter_avatar_url` text NOT NULL,
       `last_updated` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
-      PRIMARY KEY  (`tweet_avatar_id`)
+      PRIMARY KEY  (`tweet_feed_avatar_id`)
     ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci"
 );
 ?>
