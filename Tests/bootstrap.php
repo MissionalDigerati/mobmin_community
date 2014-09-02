@@ -65,6 +65,7 @@ $loader->add("Resources\Link", $libDirectory);
 $loader->add("Resources\Tag", $libDirectory);
 $loader->add("Resources\Total", $libDirectory);
 $loader->add("Resources\User", $libDirectory);
+$loader->add("Resources\TweetFeed", $libDirectory);
 $loader->add("Parsers\Tweets", $libDirectory);
 /**
  * autoload models & test files
