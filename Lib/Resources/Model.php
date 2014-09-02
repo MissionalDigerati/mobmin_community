@@ -76,11 +76,13 @@ class Model
      * @param \PDO $db The database connection
      * @return void
      * @throws InvalidArgumentException if $db is not a \PDO Object
+     * @throws LogicException if the database table does not exist
      * @author Johnathan Pulos
      **/
     public function __construct($db)
     {
         $this->setDatabaseObject($db);
+        $this->tableExists();
     }
     /**
      * Set the table prefix for the database table
@@ -120,6 +122,20 @@ class Model
             $this->db = $db;
         } else {
             throw new \InvalidArgumentException('$db must be of the class \PDO.');
+        }
+    }
+    /**
+     * Checks if the Model's table exists.  Throws an error if it is missing.
+     *
+     * @return void
+     * @access protected
+     * @author Johnathan Pulos
+     **/
+    protected function tableExists()
+    {
+        $table = $this->db->query("SHOW TABLES LIKE '" . $this->tablePrefix . $this->tableName . "'");
+        if ($table->rowCount() == 0) {
+            throw new \LogicException("The table '" . $this->tablePrefix . $this->tableName . "' is missing.");
         }
     }
     /**
