@@ -94,9 +94,11 @@ class Link extends Model
      *
      * @param \PDO $db The database connection
      * @param \Resources\Tag $tagObject The tag object
+     * @param \Resources\Total $totalObject The total object
      * @return void
      * @throws InvalidArgumentException if $db is not a \PDO Object
      * @throws InvalidArgumentException if $tagObject is not a \Resources\Tag Object
+     * @throws InvalidArgumentException if $totalObject is not a \Resources\Total Object
      * @author Johnathan Pulos
      **/
     public function __construct($db, $tagObject, $totalObject)
