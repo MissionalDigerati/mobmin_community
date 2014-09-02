@@ -158,10 +158,10 @@ $embedlyAPI = new \Embedly\Embedly(array('key'   =>  $embedlySettings->APIKey));
 $parser = new \Parsers\Tweets($embedlyAPI, $slugify);
 $defaults =  array(
     'link_author'   =>  $pliggUserData[0]['user_id'],
-    'link_status'   =>  'new',
+    'link_status'   =>  'published',
     'link_randkey'  =>  0,
-    'link_votes'    =>  1,
-    'link_karma'    =>  1,
+    'link_votes'    =>  0,
+    'link_karma'    =>  0,
     'link_modified' =>  '',
     'link_category' =>  $pliggCategory
 );
