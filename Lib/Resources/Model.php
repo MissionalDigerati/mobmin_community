@@ -170,7 +170,7 @@ class Model
     protected function insertRecord($data)
     {
         $stmt = $this->db->prepare($this->getInsertQuery());
-        $stmt = $this->bindValues($stmt, $data, 'insert');
+        $stmt = $this->bindValues($stmt, $data);
         $saved = $stmt->execute();
         if ($saved === true) {
             $this->lastID = $this->db->lastInsertId();
@@ -197,21 +197,15 @@ class Model
      *
      * @param PDOStatement $statement The statement to bind values to
      * @param array $data The data to save regarding the Resource
-     * @param string $queryType (insert, update)
      * @return \PDOStatement The statement object
      * @author Johnathan Pulos
      **/
-    protected function bindValues($statement, $data, $queryType = 'insert')
+    protected function bindValues($statement, $data)
     {
-        foreach ($this->accessibleAttributes as $attribute) {
-            if (array_key_exists($attribute, $data)) {
-                $value = $this->prepareAttribute($attribute, $data[$attribute]);
-            } else {
-                if (strtolower($queryType) == 'insert') {
-                    $value = $this->prepareAttribute($attribute, '');
-                }
-            }
-            $statement->bindValue(":" . $attribute, $value);
+        $data = $this->cleanNonWhitelistedData($data);
+        foreach ($data as $key => $value) {
+            $newValue = $this->prepareAttribute($key, $value);
+            $statement->bindValue(":" . $key, $newValue);
         }
         return $statement;
     }
@@ -227,6 +221,24 @@ class Model
     protected function prepareAttribute($key, $value)
     {
         return $value;
+    }
+    /**
+     * Removes any nonwhitelisted values from the data array
+     *
+     * @param array $data The data to clean
+     * @return array A cleaned data array
+     * @access protected
+     * @author Johnathan Pulos
+     **/
+    protected function cleanNonWhitelistedData($data)
+    {
+        $cleanedData = array();
+        foreach ($data as $key => $value) {
+            if ((in_array($key, $this->accessibleAttributes)) || ($key == $this->primaryKey)) {
+                $cleanedData[$key] = $value;
+            }
+        }
+        return $cleanedData;
     }
 
 }

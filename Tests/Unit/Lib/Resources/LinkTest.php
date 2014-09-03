@@ -197,7 +197,7 @@ class LinkTest extends \PHPUnit_Framework_TestCase
     {
         $expected = $this->linkFactory;
         $expected['social_media_id'] = 'testSaveShouldAutomaticallySetTheRandomLinkKey';
-        unset($expected['link_randkey']);
+        $expected['link_randkey'] = null;
         $linkResource = $this->setUpLinkResource();
         $linkResource->save($expected);
         $statement = $this->db->query("SELECT link_randkey FROM " . $this->dbTablePrefix . "links WHERE social_media_id = 'testSaveShouldAutomaticallySetTheRandomLinkKey'");

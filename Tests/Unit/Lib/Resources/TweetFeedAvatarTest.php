@@ -82,7 +82,7 @@ class TweetFeedAvatarTest extends \PHPUnit_Framework_TestCase
      **/
     public function tearDown()
     {
-        $this->db->query("DELETE FROM " . $this->dbTablePrefix . "tweet_feed_avatars");
+        // $this->db->query("DELETE FROM " . $this->dbTablePrefix . "tweet_feed_avatars");
     }
     /**
      * save() should save an avatar
@@ -112,7 +112,7 @@ class TweetFeedAvatarTest extends \PHPUnit_Framework_TestCase
     {
         $avatar = $this->tweetFeedAvatarFactory;
         $avatar['tweeter_name'] = "testExistsCanFindAnAvatarFromTheTweetFeedAvatarsTable";
-        $tweetFeedAvatarResource = new \Resources\TweetFeed($this->db);
+        $tweetFeedAvatarResource = new \Resources\TweetFeedAvatar($this->db);
         $tweetFeedAvatarResource->save($avatar);
         $avatarExists = $tweetFeedAvatarResource->exists('testExistsCanFindAnAvatarFromTheTweetFeedAvatarsTable', 'tweeter_name');
         $this->assertTrue($avatarExists);
