@@ -123,7 +123,7 @@ class TweetFeedTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($expectedContent, $actual[0]['content']);
     }
     /**
-     * undocumented function
+     * exists() should return a tweet
      *
      * @return void
      * @access public
