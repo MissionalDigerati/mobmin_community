@@ -24,6 +24,7 @@ namespace Resources;
 
 /**
  * The Link Resource for managing links to the Pligg site
+ * @todo We need to create an update method for this class
  */
 class Link extends Model
 {
@@ -164,6 +165,21 @@ class Link extends Model
             $this->totalResource->increment($data['link_status']);
         }
         return $saved;
+    }
+    /**
+     * Update a record
+     *
+     * @param array $data The data to be saved
+     * @param integer $id The id of the record to save
+     * @return boolean Did it save the data?
+     * @access public
+     * @throws InvalidArgumentException if record does not exist
+     * @todo Complete the update method
+     * @author Johnathan Pulos
+     **/
+    public function update($data, $id)
+    {
+        throw new \Exception('The update() method has not been completed for this class.');
     }
     /**
      * Save the tags for the link

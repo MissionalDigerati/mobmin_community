@@ -51,18 +51,6 @@ class Tag extends Model
         'tag_link_id', 'tag_date', 'tag_words'
     );
     /**
-     * Insert the tag in the database.  Pass an id to update.
-     *
-     * @param array $data an array of the tag data to save
-     * @return boolean Did it save the data?
-     * @access public
-     * @author Johnathan Pulos
-     **/
-    public function save($data)
-    {
-        return $this->insertRecord($data);
-    }
-    /**
      * prepare the attribute before binding to the PDOStatement
      *
      * @param string $key The attribute name

@@ -62,18 +62,6 @@ class TweetFeed extends Model
         parent::__construct($db);
     }
     /**
-     * Insert a tweet to the feed table
-     *
-     * @param array $data The data to be saved
-     * @return boolean Did it save the data?
-     * @access public
-     * @author Johnathan Pulos
-     **/
-    public function save($data)
-    {
-        return $this->insertRecord($data);
-    }
-    /**
      * prepare the attribute before binding to the PDOStatement
      *
      * @param string $key The attribute name

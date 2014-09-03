@@ -62,32 +62,6 @@ class TweetFeedAvatar extends Model
         parent::__construct($db);
     }
     /**
-     * Insert a tweet feed avatar to the avatar table
-     *
-     * @param array $data The data to be saved
-     * @return boolean Did it save the data?
-     * @access public
-     * @author Johnathan Pulos
-     **/
-    public function save($data)
-    {
-        return $this->insertRecord($data);
-    }
-    /**
-     * Update a record
-     *
-     * @param array $data The data to be saved
-     * @param integer $id The id of the record to save
-     * @return boolean Did it save the data?
-     * @access public
-     * @throws InvalidArgumentException if record does not exist
-     * @author Johnathan Pulos
-     **/
-    public function update($data, $id)
-    {
-        return $this->updateRecord($data, $id);
-    }
-    /**
      * prepare the attribute before binding to the PDOStatement
      *
      * @param string $key The attribute name
