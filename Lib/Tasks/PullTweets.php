@@ -164,6 +164,7 @@ foreach ($response->statuses as $key => $tweet) {
      */
     if ($tweetFeedResource->exists($linkProviderId, 'tweet_id') === false) {
         $errorSaving = false;
+        $today = new DateTime();
         $tweeterId = $tweet->user->id_str;
         $tweeterName = $tweet->user->screen_name;
         $tweetedOn = new DateTime($tweet->created_at);
@@ -187,8 +188,25 @@ foreach ($response->statuses as $key => $tweet) {
                 /**
                  * Update the Avatar URL
                  */
+                $currentAvatar = $tweetFeedAvatarResource->findBy('tweeter_id', $tweeterId);
+                if (!empty($currentAvatar)) {
+                    /**
+                     * Update the avatar
+                     */
+                    $updateData = array(
+                        'tweeter_name'          =>  $tweeterName,
+                        'tweeter_avatar_url'    =>  $tweet->user->profile_image_url,
+                        'last_updated'          =>  $today->format("Y-m-d H:i:s")
+                    );
+                    try {
+                        $tweetFeedAvatarResource->update($updateData, $currentAvatar['tweet_feed_avatar_id']);
+                        echo "Updated the tweet avatar for " . $tweeterName . "\r\n";
+                    } catch (Exception $e) {
+                        echo "Unable to update the tweet avatar for " . $tweeterName . "\r\n";
+                        echo "Error: " . $e->getMessage() . "\r\n";
+                    }
+                }
             } else {
-                $today = new DateTime();
                 /**
                  * Save the avatar
                  */
