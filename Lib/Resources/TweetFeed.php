@@ -89,11 +89,6 @@ class TweetFeed extends Model
     protected function prepareAttribute($key, $value)
     {
         $newValue = parent::prepareAttribute($key, $value);
-        switch ($key) {
-            case 'content':
-                $newValue = strip_tags($newValue);
-                break;
-        }
-        return $newValue;
+        return strip_tags($newValue);
     }
 }
