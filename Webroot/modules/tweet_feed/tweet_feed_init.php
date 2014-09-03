@@ -30,8 +30,12 @@ if(defined('mnminclude')){
 
     $include_in_pages = array('all');
 
-    if( do_we_load_module() ) {
-
+    if (do_we_load_module()) {
         include_once(mnmmodules . 'tweet_feed/tweet_feed_main.php');
+
+        if ($_REQUEST['page'] == 'twitter-feed') {
+            tweet_feed_get_tweets();
+        }
+
     }
 }

@@ -20,3 +20,12 @@
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  * 
  */
+function tweet_feed_get_tweets()
+{
+    global $db, $main_smarty;
+    $query = "SELECT tf.tweet_feed_id, tf.tweeter_id, tf.tweeter_name, tf.content, tf.published_date, " .
+        "ta.tweeter_avatar_url FROM " . table_prefix . "tweet_feed as tf JOIN " . table_prefix . "tweet_feed_avatars as ta ON " .
+        "tf.tweeter_id = ta.tweeter_id ORDER BY tf.published_date ASC";
+    $tweets = $db->get_results($query);
+    $vars['smarty']->_vars['tweets'] = $tweets;
+}
