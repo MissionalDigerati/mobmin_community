@@ -118,13 +118,13 @@ class TweetFeedAvatarTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($avatarExists);
     }
     /**
-     * updateRecord() should update an existing record
+     * update() should update an existing record
      *
      * @return void
      * @access public
      * @author Johnathan Pulos
      **/
-    public function testSaveSouldUpdateAnExistingTweetAvatar()
+    public function testUpdateShouldUpdateAnExistingTweetAvatar()
     {
         $expectedTweeterName = "Bilbo Baggins";
         $expectedURL = "http://www.BilboBaggins.com/img.jpg";
@@ -137,7 +137,7 @@ class TweetFeedAvatarTest extends \PHPUnit_Framework_TestCase
         $this->db->query($query);
         $lastID = $this->db->lastInsertId();
         $tweetFeedAvatarResource = new \Resources\TweetFeedAvatar($this->db);
-        $tweetFeedAvatarResource->updateRecord($data, $lastID);
+        $tweetFeedAvatarResource->update($data, $lastID);
         $statement = $this->db->query("SELECT * FROM " . $this->dbTablePrefix . "tweet_feed_avatars WHERE tweet_feed_avatar_id = " . $lastID);
         $actual = $statement->fetchAll(\PDO::FETCH_ASSOC);
         $this->assertFalse(empty($actual));
@@ -145,20 +145,20 @@ class TweetFeedAvatarTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($expectedURL, $actual[0]['tweeter_avatar_url']);
     }
     /**
-     * updateRecord() should throw an error if the record does not exist
+     * update() should throw an error if the record does not exist
      *
      * @return void
      * @access public
      * @expectedException InvalidArgumentException
      * @author Johnathan Pulos
      **/
-    public function testUpdateRecordShouldThrowErrorIfRecordDoesNotExist()
+    public function testUpdateShouldThrowErrorIfRecordDoesNotExist()
     {
         $data = array(
             'tweeter_name'          =>  'Goober',
             'tweeter_avatar_url'    =>  'http://www.goober.com'
         );
         $tweetFeedAvatarResource = new \Resources\TweetFeedAvatar($this->db);
-        $tweetFeedAvatarResource->updateRecord($data, rand(10000, 10000000));
+        $tweetFeedAvatarResource->update($data, rand(10000, 10000000));
     }
 }

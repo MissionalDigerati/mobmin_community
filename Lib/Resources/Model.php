@@ -185,11 +185,11 @@ class Model
      * @param array $data an array of data to update
      * @param integer $id The id of the record to update
      * @return boolean Did it update?
-     * @access public
+     * @access protected
      * @throws InvalidArgumentException if record does not exist
      * @author Johnathan Pulos
      **/
-    public function updateRecord($data, $id)
+    protected function updateRecord($data, $id)
     {
         if ($this->exists($id, $this->primaryKey) === false) {
             throw new \InvalidArgumentException("The record with id = " . $id . " does not exist.");
