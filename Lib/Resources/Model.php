@@ -169,7 +169,6 @@ class Model
      **/
     protected function insertRecord($data)
     {
-        $data = $this->cleanNonWhitelistedData($data);
         $stmt = $this->db->prepare($this->getInsertQuery($data));
         $stmt = $this->bindValues($stmt, $data);
         $saved = $stmt->execute();
@@ -181,16 +180,38 @@ class Model
         return $saved;
     }
     /**
-     * Generates the insert SQL query based on the set $accessibleAttributes class variable
+     * Generates the insert SQL query based on a cleanNonWhitelistedData() data array
      *
+     * @param array $data an array of the link data to save
      * @return string The final Query statement
      * @access protected
      * @author Johnathan Pulos
      **/
     protected function getInsertQuery($data)
     {
+        $data = $this->cleanNonWhitelistedData($data);
         $query = "INSERT INTO " . $this->tablePrefix . $this->tableName . "(" .
             implode(', ', array_keys($data)) . ") VALUES(:" . implode(', :', array_keys($data)) . ")";
+        return $query;
+    }
+    /**
+     * Generates the update SQL query based on a cleanNonWhitelistedData() data array
+     *
+     * @param array $data an array of the link data to save
+     * @return string The final Query statement
+     * @access protected
+     * @author Johnathan Pulos
+     **/
+    protected function getUpdateQuery($data)
+    {
+        $data = $this->cleanNonWhitelistedData($data);
+        $query = "UPDATE " . $this->tablePrefix . $this->tableName . " SET ";
+        $valueStatements = array();
+        foreach ($data as $key => $value) {
+            array_push($valueStatements, $key . " = :" . $key);
+        }
+        $query .= implode(", ", $valueStatements);
+        $query .= " WHERE " . $this->primaryKey . " = :" . $this->primaryKey;
         return $query;
     }
     /**
@@ -203,6 +224,7 @@ class Model
      **/
     protected function bindValues($statement, $data)
     {
+        $data = $this->cleanNonWhitelistedData($data);
         foreach ($data as $key => $value) {
             $newValue = $this->prepareAttribute($key, $value);
             $statement->bindValue(":" . $key, $newValue);

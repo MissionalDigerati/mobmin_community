@@ -79,7 +79,10 @@ class ModelTest extends \PHPUnit_Framework_TestCase
     public function testGetInsertQueryShouldGenerateTheCorrectQuery()
     {
         $expected = "INSERT INTO " . $this->dbTablePrefix . "users(name, date) VALUES(:name, :date)";
-        $data = array('name'    =>  'Bob', 'date'   =>  '2013-21-23');
+        $data = array(
+            'name'  =>  'Bob',
+            'date'  =>  '2013-21-23'
+        );
         $model = new \Resources\Model($this->db);
         $reflectionOfModel = new \ReflectionClass('\Resources\Model');
 
@@ -92,6 +95,40 @@ class ModelTest extends \PHPUnit_Framework_TestCase
         $tableName->setValue($model, 'users');
 
         $method = $reflectionOfModel->getMethod('getInsertQuery');
+        $method->setAccessible(true);
+        $actual = $method->invoke($model, $data);
+        $this->assertEquals($expected, $actual);
+    }
+    /**
+     * getUpdateQuery() should generate the correct query statement
+     *
+     * @return void
+     * @access public
+     * @author Johnathan Pulos
+     **/
+    public function testGetUpdateQueryShouldGenerateTheCorrectQuery()
+    {
+        $expected = "UPDATE " . $this->dbTablePrefix . "users SET hobbies = :hobbies, talents = :talents WHERE user_id = :user_id";
+        $data = array(
+            'hobbies'   =>  'Golfing, Swimming, Gaming',
+            'talents'   =>  'Programming'
+        );
+        $model = new \Resources\Model($this->db);
+        $reflectionOfModel = new \ReflectionClass('\Resources\Model');
+
+        $accessibleAttributes = $reflectionOfModel->getProperty('accessibleAttributes');
+        $accessibleAttributes->setAccessible(true);
+        $accessibleAttributes->setValue($model, array('hobbies', 'talents'));
+
+        $tableName = $reflectionOfModel->getProperty('tableName');
+        $tableName->setAccessible(true);
+        $tableName->setValue($model, 'users');
+
+        $tableName = $reflectionOfModel->getProperty('primaryKey');
+        $tableName->setAccessible(true);
+        $tableName->setValue($model, 'user_id');
+
+        $method = $reflectionOfModel->getMethod('getUpdateQuery');
         $method->setAccessible(true);
         $actual = $method->invoke($model, $data);
         $this->assertEquals($expected, $actual);
