@@ -62,20 +62,16 @@ class TweetFeed extends Model
         parent::__construct($db);
     }
     /**
-     * Insert/Update a tweet to the feed table
+     * Insert a tweet to the feed table
      *
      * @param array $data The data to be saved
-     * @param integer $id The id of the tweet to update (default = null)
      * @return boolean Did it save the data?
      * @access public
      * @author Johnathan Pulos
-     * @todo Implement update script
      **/
-    public function save($data, $id = null)
+    public function save($data)
     {
-        if (is_null($id)) {
-            return $this->insertRecord($data);
-        }
+        return $this->insertRecord($data);
     }
     /**
      * prepare the attribute before binding to the PDOStatement
