@@ -82,7 +82,7 @@ class TweetFeedAvatarTest extends \PHPUnit_Framework_TestCase
      **/
     public function tearDown()
     {
-        // $this->db->query("DELETE FROM " . $this->dbTablePrefix . "tweet_feed_avatars");
+        $this->db->query("DELETE FROM " . $this->dbTablePrefix . "tweet_feed_avatars");
     }
     /**
      * save() should save an avatar
@@ -116,5 +116,49 @@ class TweetFeedAvatarTest extends \PHPUnit_Framework_TestCase
         $tweetFeedAvatarResource->save($avatar);
         $avatarExists = $tweetFeedAvatarResource->exists('testExistsCanFindAnAvatarFromTheTweetFeedAvatarsTable', 'tweeter_name');
         $this->assertTrue($avatarExists);
+    }
+    /**
+     * updateRecord() should update an existing record
+     *
+     * @return void
+     * @access public
+     * @author Johnathan Pulos
+     **/
+    public function testSaveSouldUpdateAnExistingTweetAvatar()
+    {
+        $expectedTweeterName = "Bilbo Baggins";
+        $expectedURL = "http://www.BilboBaggins.com/img.jpg";
+        $data = array(
+            'tweeter_name'          =>  $expectedTweeterName,
+            'tweeter_avatar_url'    =>  $expectedURL
+        );
+        $query = "INSERT INTO tweet_feed_avatars (tweeter_id, tweeter_name, tweeter_avatar_url, last_updated) " .
+            "VALUES('172157274', 'ARJWright', 'http://test.com/test.jpeg', '2014-09-03 03:01:53')";
+        $this->db->query($query);
+        $lastID = $this->db->lastInsertId();
+        $tweetFeedAvatarResource = new \Resources\TweetFeedAvatar($this->db);
+        $tweetFeedAvatarResource->updateRecord($data, $lastID);
+        $statement = $this->db->query("SELECT * FROM " . $this->dbTablePrefix . "tweet_feed_avatars WHERE tweet_feed_avatar_id = " . $lastID);
+        $actual = $statement->fetchAll(\PDO::FETCH_ASSOC);
+        $this->assertFalse(empty($actual));
+        $this->assertEquals($expectedTweeterName, $actual[0]['tweeter_name']);
+        $this->assertEquals($expectedURL, $actual[0]['tweeter_avatar_url']);
+    }
+    /**
+     * updateRecord() should throw an error if the record does not exist
+     *
+     * @return void
+     * @access public
+     * @expectedException InvalidArgumentException
+     * @author Johnathan Pulos
+     **/
+    public function testUpdateRecordShouldThrowErrorIfRecordDoesNotExist()
+    {
+        $data = array(
+            'tweeter_name'          =>  'Goober',
+            'tweeter_avatar_url'    =>  'http://www.goober.com'
+        );
+        $tweetFeedAvatarResource = new \Resources\TweetFeedAvatar($this->db);
+        $tweetFeedAvatarResource->updateRecord($data, rand(10000, 10000000));
     }
 }

@@ -180,6 +180,32 @@ class Model
         return $saved;
     }
     /**
+     * update the given record with the given data
+     *
+     * @param array $data an array of data to update
+     * @param integer $id The id of the record to update
+     * @return boolean Did it update?
+     * @access public
+     * @throws InvalidArgumentException if record does not exist
+     * @author Johnathan Pulos
+     **/
+    public function updateRecord($data, $id)
+    {
+        if ($this->exists($id, $this->primaryKey) === false) {
+            throw new \InvalidArgumentException("The record with id = " . $id . " does not exist.");
+        }
+        $stmt = $this->db->prepare($this->getUpdateQuery($data));
+        $stmt = $this->bindValues($stmt, $data);
+        $stmt->bindValue(":" . $this->primaryKey, $id);
+        $saved = $stmt->execute();
+        if ($saved === true) {
+            $this->lastID = $id;
+        } else {
+            $this->lastID =  null;
+        }
+        return $saved;
+    }
+    /**
      * Generates the insert SQL query based on a cleanNonWhitelistedData() data array
      *
      * @param array $data an array of the link data to save
