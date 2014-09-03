@@ -156,6 +156,22 @@ class Model
         return $this->updateRecord($data, $id);
     }
     /**
+     * Find the record by it's id
+     *
+     * @param integer $id The id of the record
+     * @return array The record that was found
+     * @access public
+     * @author Johnathan Pulos
+     **/
+    public function findByID($id)
+    {
+        $stmt = $this->db->prepare("SELECT * FROM " . $this->tablePrefix . $this->tableName . " WHERE " . $this->primaryKey . " = :id LIMIT 1");
+        $stmt->bindValue(":id", intval($id));
+        $stmt->execute();
+        $data = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        return ($stmt->rowCount() > 0) ? $data[0] : array();
+    }
+    /**
      * Set the PDO Database Object
      *
      * @param \PDO $db The database connection
@@ -222,7 +238,7 @@ class Model
         }
         $stmt = $this->db->prepare($this->getUpdateQuery($data));
         $stmt = $this->bindValues($stmt, $data);
-        $stmt->bindValue(":" . $this->primaryKey, $id);
+        $stmt->bindValue(":" . $this->primaryKey, intval($id));
         $saved = $stmt->execute();
         if ($saved === true) {
             $this->lastID = $id;

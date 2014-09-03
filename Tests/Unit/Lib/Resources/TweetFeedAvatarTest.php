@@ -161,4 +161,35 @@ class TweetFeedAvatarTest extends \PHPUnit_Framework_TestCase
         $tweetFeedAvatarResource = new \Resources\TweetFeedAvatar($this->db);
         $tweetFeedAvatarResource->update($data, rand(10000, 10000000));
     }
+    /**
+     * findById() should return an existing record
+     *
+     * @return void
+     * @access public
+     * @author Johnathan Pulos
+     **/
+    public function testFindByIDShouldReturnTheCorrectRecord()
+    {
+        $query = "INSERT INTO tweet_feed_avatars (tweeter_id, tweeter_name, tweeter_avatar_url, last_updated) " .
+            "VALUES('22112211', 'JMBold', 'http://test.com/test.jpeg', '2014-10-03 03:01:53')";
+        $this->db->query($query);
+        $lastID = $this->db->lastInsertId();
+        $tweetFeedAvatarResource = new \Resources\TweetFeedAvatar($this->db);
+        $record = $tweetFeedAvatarResource->findByID($lastID);
+        $this->assertFalse(empty($record));
+        $this->assertEquals($lastID, $record['tweet_feed_avatar_id']);
+    }
+    /**
+     * findByID() should return an empty array if the record does not exist
+     *
+     * @return void
+     * @access public
+     * @author Johnathan Pulos
+     **/
+    public function testFindByIDShouldReturnAnEmptyArrayIfTheRecordDoesNotExist()
+    {
+        $tweetFeedAvatarResource = new \Resources\TweetFeedAvatar($this->db);
+        $record = $tweetFeedAvatarResource->findByID(rand(10000, 10000000));
+        $this->assertTrue(empty($record));
+    }
 }
