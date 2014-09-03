@@ -156,17 +156,21 @@ class Model
         return $this->updateRecord($data, $id);
     }
     /**
-     * Find the record by it's id
+     * Find the record by a given column
      *
-     * @param integer $id The id of the record
+     * @param string $column The column name to search by
+     * @param mixed $val The value of the column
      * @return array The record that was found
      * @access public
      * @author Johnathan Pulos
      **/
-    public function findByID($id)
+    public function findBy($column, $val)
     {
-        $stmt = $this->db->prepare("SELECT * FROM " . $this->tablePrefix . $this->tableName . " WHERE " . $this->primaryKey . " = :id LIMIT 1");
-        $stmt->bindValue(":id", intval($id));
+        if ((!in_array($column, $this->accessibleAttributes)) && ($column != $this->primaryKey)) {
+            throw new \InvalidArgumentException('$column is unaccessible.');
+        }
+        $stmt = $this->db->prepare("SELECT * FROM " . $this->tablePrefix . $this->tableName . " WHERE " . $column . " = :val LIMIT 1");
+        $stmt->bindValue(":val", strip_tags($val));
         $stmt->execute();
         $data = $stmt->fetchAll(\PDO::FETCH_ASSOC);
         return ($stmt->rowCount() > 0) ? $data[0] : array();

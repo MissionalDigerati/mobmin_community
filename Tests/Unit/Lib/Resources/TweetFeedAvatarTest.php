@@ -162,25 +162,25 @@ class TweetFeedAvatarTest extends \PHPUnit_Framework_TestCase
         $tweetFeedAvatarResource->update($data, rand(10000, 10000000));
     }
     /**
-     * findById() should return an existing record
+     * findBy() should return an existing record
      *
      * @return void
      * @access public
      * @author Johnathan Pulos
      **/
-    public function testFindByIDShouldReturnTheCorrectRecord()
+    public function testFindByShouldReturnTheCorrectRecord()
     {
         $query = "INSERT INTO tweet_feed_avatars (tweeter_id, tweeter_name, tweeter_avatar_url, last_updated) " .
             "VALUES('22112211', 'JMBold', 'http://test.com/test.jpeg', '2014-10-03 03:01:53')";
         $this->db->query($query);
         $lastID = $this->db->lastInsertId();
         $tweetFeedAvatarResource = new \Resources\TweetFeedAvatar($this->db);
-        $record = $tweetFeedAvatarResource->findByID($lastID);
+        $record = $tweetFeedAvatarResource->findBy('tweet_feed_avatar_id', $lastID);
         $this->assertFalse(empty($record));
         $this->assertEquals($lastID, $record['tweet_feed_avatar_id']);
     }
     /**
-     * findByID() should return an empty array if the record does not exist
+     * findBy() should return an empty array if the record does not exist
      *
      * @return void
      * @access public
@@ -189,7 +189,24 @@ class TweetFeedAvatarTest extends \PHPUnit_Framework_TestCase
     public function testFindByIDShouldReturnAnEmptyArrayIfTheRecordDoesNotExist()
     {
         $tweetFeedAvatarResource = new \Resources\TweetFeedAvatar($this->db);
-        $record = $tweetFeedAvatarResource->findByID(rand(10000, 10000000));
+        $record = $tweetFeedAvatarResource->findBy('tweet_feed_avatar_id', rand(10000, 10000000));
         $this->assertTrue(empty($record));
+    }
+    /**
+     * findBy() throws an error if you try to search using a nonwhitelisted column
+     *
+     * @return void
+     * @access public
+     * @expectedException InvalidArgumentException
+     * @author Johnathan Pulos
+     **/
+    public function testFindByShouldThrowErrorIfYouTryToUseNonWhitelistedColumnName()
+    {
+        $tweetFeedAvatarResource = new \Resources\TweetFeedAvatar($this->db);
+        $reflectionOfModel = new \ReflectionClass('\Resources\TweetFeedAvatar');
+        $accessibleAttributes = $reflectionOfModel->getProperty('accessibleAttributes');
+        $accessibleAttributes->setAccessible(true);
+        $accessibleAttributes->setValue($tweetFeedAvatarResource, array('tweeter_id', 'tweeter_avatar_url', 'last_updated'));
+        $record = $tweetFeedAvatarResource->findBy('tweeter_name', 'Yahoo');
     }
 }
