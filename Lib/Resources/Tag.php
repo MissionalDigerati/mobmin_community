@@ -51,20 +51,16 @@ class Tag extends Model
         'tag_link_id', 'tag_date', 'tag_words'
     );
     /**
-     * Insert/Update the tag in the database.  Pass an id to update.
+     * Insert the tag in the database.  Pass an id to update.
      *
      * @param array $data an array of the tag data to save
-     * @param integer $id the Link.link_id of the record to update
      * @return boolean Did it save the data?
      * @access public
      * @author Johnathan Pulos
-     * @todo Implement update script
      **/
-    public function save($data, $id = null)
+    public function save($data)
     {
-        if (is_null($id)) {
-            return $this->insertRecord($data);
-        }
+        return $this->insertRecord($data);
     }
     /**
      * prepare the attribute before binding to the PDOStatement
