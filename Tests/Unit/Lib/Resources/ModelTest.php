@@ -155,4 +155,35 @@ class ModelTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals($expected, $actual);
     }
+    /**
+     * cleanNonWhitelistedData() should remove data that is not whitelisted
+     *
+     * @return void
+     * @access public
+     * @author Johnathan Pulos
+     **/
+    public function testCleanNonWhitelistedDataRemovesUnWantedData()
+    {
+        $expected = array(
+            'hobbies'   =>  'Golfing, Swimming, Gaming',
+            'talents'   =>  'Programming'
+        );
+        $data = array(
+            'name'      =>  'Hacker',
+            'hobbies'   =>  'Golfing, Swimming, Gaming',
+            'talents'   =>  'Programming',
+            'your_site' =>  'SUCKS!!!!!'
+        );
+        $model = new \Resources\Model($this->db);
+        $reflectionOfModel = new \ReflectionClass('\Resources\Model');
+
+        $accessibleAttributes = $reflectionOfModel->getProperty('accessibleAttributes');
+        $accessibleAttributes->setAccessible(true);
+        $accessibleAttributes->setValue($model, array('hobbies', 'talents'));
+
+        $method = $reflectionOfModel->getMethod('cleanNonWhitelistedData');
+        $method->setAccessible(true);
+        $actual = $method->invoke($model, $data);
+        $this->assertEquals($expected, $actual);
+    }
 }
