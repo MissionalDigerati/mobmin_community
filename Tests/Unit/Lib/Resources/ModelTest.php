@@ -79,6 +79,7 @@ class ModelTest extends \PHPUnit_Framework_TestCase
     public function testGetInsertQueryShouldGenerateTheCorrectQuery()
     {
         $expected = "INSERT INTO " . $this->dbTablePrefix . "users(name, date) VALUES(:name, :date)";
+        $data = array('name'    =>  'Bob', 'date'   =>  '2013-21-23');
         $model = new \Resources\Model($this->db);
         $reflectionOfModel = new \ReflectionClass('\Resources\Model');
 
@@ -92,7 +93,7 @@ class ModelTest extends \PHPUnit_Framework_TestCase
 
         $method = $reflectionOfModel->getMethod('getInsertQuery');
         $method->setAccessible(true);
-        $actual = $method->invoke($model);
+        $actual = $method->invoke($model, $data);
         $this->assertEquals($expected, $actual);
     }
     /**

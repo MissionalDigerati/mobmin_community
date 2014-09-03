@@ -169,7 +169,8 @@ class Model
      **/
     protected function insertRecord($data)
     {
-        $stmt = $this->db->prepare($this->getInsertQuery());
+        $data = $this->cleanNonWhitelistedData($data);
+        $stmt = $this->db->prepare($this->getInsertQuery($data));
         $stmt = $this->bindValues($stmt, $data);
         $saved = $stmt->execute();
         if ($saved === true) {
@@ -186,10 +187,10 @@ class Model
      * @access protected
      * @author Johnathan Pulos
      **/
-    protected function getInsertQuery()
+    protected function getInsertQuery($data)
     {
         $query = "INSERT INTO " . $this->tablePrefix . $this->tableName . "(" .
-            implode(', ', $this->accessibleAttributes) . ") VALUES(:" . implode(', :', $this->accessibleAttributes) . ")";
+            implode(', ', array_keys($data)) . ") VALUES(:" . implode(', :', array_keys($data)) . ")";
         return $query;
     }
     /**
@@ -202,7 +203,6 @@ class Model
      **/
     protected function bindValues($statement, $data)
     {
-        $data = $this->cleanNonWhitelistedData($data);
         foreach ($data as $key => $value) {
             $newValue = $this->prepareAttribute($key, $value);
             $statement->bindValue(":" . $key, $newValue);
