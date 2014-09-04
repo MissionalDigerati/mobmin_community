@@ -20,12 +20,33 @@
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  * 
  */
+function tweet_feed_get_current_page($totalPages) {
+    $currentPage = (isset($_REQUEST['current-page'])) ? intval($_REQUEST['current-page']) : 1;
+    if ($currentPage > $totalPages) {
+        $currentPage = $totalPages;
+    } elseif ($currentPage < 1) {
+        $currentPage = 1;
+    }
+    return $currentPage;
+}
 function tweet_feed_get_tweets()
 {
     global $db, $main_smarty;
+    $resultsPerPage = 20;
+    /**
+     * Setup the pagination information
+     */
+    $query = "SELECT COUNT(*) FROM " . table_prefix . "tweet_feed";
+    $totalRows = $db->get_var($query);
+    $totalPages = ceil($totalRows / $resultsPerPage);
+    $currentPage = tweet_feed_get_current_page($totalPages);
+    $offset = ($currentPage - 1) * $resultsPerPage;
+    /**
+     * Generate the query
+     */
     $query = "SELECT tf.tweet_feed_id, tf.tweet_id, tf.tweeter_id, tf.tweeter_name, tf.content, tf.published_date, " .
         "ta.tweeter_avatar_url FROM " . table_prefix . "tweet_feed as tf JOIN " . table_prefix . "tweet_feed_avatars as ta ON " .
-        "tf.tweeter_id = ta.tweeter_id ORDER BY tf.published_date ASC";
+        "tf.tweeter_id = ta.tweeter_id ORDER BY tf.published_date ASC LIMIT " . $offset . ", " . $resultsPerPage;
     $results = $db->get_results($query);
     $tweets = array();
     foreach ($results as $result) {
@@ -42,4 +63,12 @@ function tweet_feed_get_tweets()
     }
     $main_smarty->assign('tweets' , $tweets);
     $main_smarty->assign('twitter_feed_current' , true);
+    $main_smarty->assign('pagi_current_page' , $currentPage);
+    $main_smarty->assign('pagi_total_pages' , $totalPages);
+    $main_smarty->assign('max_pagi_count' , $totalPages+1);
+    $pagi_previous_page = ($currentPage == 1) ? 1 : $currentPage-1;
+    $main_smarty->assign('pagi_previous_page' , $pagi_previous_page);
+    $pagi_next_page = ($currentPage == $totalPages) ? $totalPages : $currentPage+1;
+    $main_smarty->assign('pagi_next_page' , $pagi_next_page);
+    $main_smarty->assign('max_pagi_count' , $totalPages+1);
 }
