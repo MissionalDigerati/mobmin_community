@@ -41,4 +41,5 @@ function tweet_feed_get_tweets()
         array_push($tweets, $tweet);
     }
     $main_smarty->assign('tweets' , $tweets);
+    $main_smarty->assign('twitter_feed_current' , true);
 }
