@@ -35,6 +35,8 @@ if(defined('mnminclude')){
 
         if ($_REQUEST['page'] == 'twitter-feed') {
             tweet_feed_get_tweets();
+            module_add_action_tpl('tpl_pligg_head_end', tf_tpl_path . 'tweet_feed_pligg_head_end.tpl');
+            module_add_action_tpl('tpl_pligg_above_center', tf_tpl_path . 'tweet_feed_display.tpl');
         }
 
     }

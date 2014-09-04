@@ -1,5 +1,6 @@
 var totalStories = 0;
 $(document).ready(function($) {
+    $('div.edit').hide();
     if ($('div.tweet-content').length > 0) {
         convertAllTweets();
         totalStories = $('div.stories').length;

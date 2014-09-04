@@ -23,9 +23,22 @@
 function tweet_feed_get_tweets()
 {
     global $db, $main_smarty;
-    $query = "SELECT tf.tweet_feed_id, tf.tweeter_id, tf.tweeter_name, tf.content, tf.published_date, " .
+    $query = "SELECT tf.tweet_feed_id, tf.tweet_id, tf.tweeter_id, tf.tweeter_name, tf.content, tf.published_date, " .
         "ta.tweeter_avatar_url FROM " . table_prefix . "tweet_feed as tf JOIN " . table_prefix . "tweet_feed_avatars as ta ON " .
         "tf.tweeter_id = ta.tweeter_id ORDER BY tf.published_date ASC";
-    $tweets = $db->get_results($query);
-    $vars['smarty']->_vars['tweets'] = $tweets;
+    $results = $db->get_results($query);
+    $tweets = array();
+    foreach ($results as $result) {
+        $tweet = array(
+            'tweet_feed_id'         =>  $result->tweet_feed_id,
+            'tweet_id'              =>  $result->tweet_id,
+            'tweeter_id'            =>  $result->tweeter_id,
+            'tweeter_name'          =>  $result->tweeter_name,
+            'content'               =>  $result->content,
+            'published_date'        =>  $result->published_date,
+            'tweeter_avatar_url'    =>  $result->tweeter_avatar_url
+        );
+        array_push($tweets, $tweet);
+    }
+    $main_smarty->assign('tweets' , $tweets);
 }
