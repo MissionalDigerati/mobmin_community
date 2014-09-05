@@ -108,6 +108,8 @@ $loader->add("Resources\Model", $libDirectory);
 $loader->add("Resources\Link", $libDirectory);
 $loader->add("Resources\Tag", $libDirectory);
 $loader->add("Resources\Total", $libDirectory);
+$loader->add("Resources\TweetFeed", $libDirectory);
+$loader->add("Resources\TweetFeedAvatar", $libDirectory);
 $loader->add("Resources\User", $libDirectory);
 $loader->add("Parsers\Tweets", $libDirectory);
 /**
@@ -129,6 +131,13 @@ $pliggUserData = $userResource->findByUserLogin($pliggUsername);
 $linkResource = new \Resources\Link($mysqlDatabase, new \Resources\Tag($mysqlDatabase), new \Resources\Total($mysqlDatabase));
 $linkResource->setTablePrefix($dbSettings->default['table_prefix']);
 /**
+ * Instantiate the TweetFeed classes
+ */
+$tweetFeedResource = new \Resources\TweetFeed($mysqlDatabase);
+$tweetFeedResource->setTablePrefix($dbSettings->default['table_prefix']);
+$tweetFeedAvatarResource = new \Resources\TweetFeedAvatar($mysqlDatabase);
+$tweetFeedAvatarResource->setTablePrefix($dbSettings->default['table_prefix']);
+/**
  * Connect OAuth to get tokens
  */
 $twitterSettings = new \Config\TwitterSettings();
@@ -145,10 +154,77 @@ $filteredResponse = $response;
 foreach ($response->statuses as $key => $tweet) {
     $linkProviderId = $tweet->id_str;
     /**
-     * Have we parsed this tweet?
+     * Have we parsed this tweet's links?
      */
     if ($linkResource->exists($linkProviderId, 'social_media_id') === true) {
         unset($filteredResponse->statuses[$key]);
+    }
+    /**
+     * Check if the tweet was added to the TweetFeed Module
+     */
+    if ($tweetFeedResource->exists($linkProviderId, 'tweet_id') === false) {
+        $errorSaving = false;
+        $today = new DateTime();
+        $tweeterId = $tweet->user->id_str;
+        $tweeterName = $tweet->user->screen_name;
+        $tweetedOn = new DateTime($tweet->created_at);
+        $tweetData = array(
+            'tweet_id'          =>  $linkProviderId,
+            'tweeter_id'        =>  $tweeterId,
+            'tweeter_name'      =>  $tweeterName,
+            'content'           =>  $tweet->text,
+            'published_date'    =>  $tweetedOn->format("Y-m-d H:i:s")
+        );
+        try {
+            $tweetFeedResource->save($tweetData);
+            echo "Saved the tweet posted by " . $tweeterName . " on " . $tweetedOn->format("Y-m-d H:i:s") . "\r\n";
+        } catch (Exception $e) {
+            echo "Unable to save the tweet posted by " . $tweeterName . " on " . $tweetedOn->format("Y-m-d H:i:s") . "\r\n";
+            echo "Error: " . $e->getMessage() . "\r\n";
+            $errorSaving = true;
+        }
+        if ($errorSaving === false) {
+            if ($tweetFeedAvatarResource->exists($tweeterId, 'tweeter_id') === true) {
+                /**
+                 * Update the Avatar URL
+                 */
+                $currentAvatar = $tweetFeedAvatarResource->findBy('tweeter_id', $tweeterId);
+                if (!empty($currentAvatar)) {
+                    /**
+                     * Update the avatar
+                     */
+                    $updateData = array(
+                        'tweeter_name'          =>  $tweeterName,
+                        'tweeter_avatar_url'    =>  $tweet->user->profile_image_url,
+                        'last_updated'          =>  $today->format("Y-m-d H:i:s")
+                    );
+                    try {
+                        $tweetFeedAvatarResource->update($updateData, $currentAvatar['tweet_feed_avatar_id']);
+                        echo "Updated the tweet avatar for " . $tweeterName . "\r\n";
+                    } catch (Exception $e) {
+                        echo "Unable to update the tweet avatar for " . $tweeterName . "\r\n";
+                        echo "Error: " . $e->getMessage() . "\r\n";
+                    }
+                }
+            } else {
+                /**
+                 * Save the avatar
+                 */
+                $tweetAvatarData = array(
+                    'tweeter_id'            =>  $tweeterId,
+                    'tweeter_name'          =>  $tweeterName,
+                    'tweeter_avatar_url'    =>  $tweet->user->profile_image_url,
+                    'last_updated'          =>  $today->format("Y-m-d H:i:s")
+                );
+                try {
+                    $tweetFeedAvatarResource->save($tweetAvatarData);
+                    echo "Saved the tweet avatar for " . $tweeterName . "\r\n";
+                } catch (Exception $e) {
+                    echo "Unable to save the tweet avatar for " . $tweeterName . "\r\n";
+                    echo "Error: " . $e->getMessage() . "\r\n";
+                }
+            }
+        }
     }
 }
 /**

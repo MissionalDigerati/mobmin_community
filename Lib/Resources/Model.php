@@ -76,11 +76,13 @@ class Model
      * @param \PDO $db The database connection
      * @return void
      * @throws InvalidArgumentException if $db is not a \PDO Object
+     * @throws LogicException if the database table does not exist
      * @author Johnathan Pulos
      **/
     public function __construct($db)
     {
         $this->setDatabaseObject($db);
+        $this->tableExists();
     }
     /**
      * Set the table prefix for the database table
@@ -106,23 +108,6 @@ class Model
         return $this->lastID;
     }
     /**
-     * Set the PDO Database Object
-     *
-     * @param \PDO $db The database connection
-     * @return void
-     * @access protected
-     * @throws InvalidArgumentException if $db is not a \PDO Object
-     * @author Johnathan Pulos
-     **/
-    protected function setDatabaseObject($db)
-    {
-        if (is_a($db, 'PDO')) {
-            $this->db = $db;
-        } else {
-            throw new \InvalidArgumentException('$db must be of the class \PDO.');
-        }
-    }
-    /**
      * Checks if the object exists
      *
      * @param string $value The value to look up
@@ -145,6 +130,83 @@ class Model
         return ($stmt->rowCount() > 0);
     }
     /**
+     * Insert a tweet feed avatar to the avatar table
+     *
+     * @param array $data The data to be saved
+     * @return boolean Did it save the data?
+     * @access public
+     * @author Johnathan Pulos
+     **/
+    public function save($data)
+    {
+        return $this->insertRecord($data);
+    }
+    /**
+     * Update a record
+     *
+     * @param array $data The data to be saved
+     * @param integer $id The id of the record to save
+     * @return boolean Did it save the data?
+     * @access public
+     * @throws InvalidArgumentException if record does not exist
+     * @author Johnathan Pulos
+     **/
+    public function update($data, $id)
+    {
+        return $this->updateRecord($data, $id);
+    }
+    /**
+     * Find the record by a given column
+     *
+     * @param string $column The column name to search by
+     * @param mixed $val The value of the column
+     * @return array The record that was found
+     * @access public
+     * @author Johnathan Pulos
+     **/
+    public function findBy($column, $val)
+    {
+        if ((!in_array($column, $this->accessibleAttributes)) && ($column != $this->primaryKey)) {
+            throw new \InvalidArgumentException('$column is unaccessible.');
+        }
+        $stmt = $this->db->prepare("SELECT * FROM " . $this->tablePrefix . $this->tableName . " WHERE " . $column . " = :val LIMIT 1");
+        $stmt->bindValue(":val", strip_tags($val));
+        $stmt->execute();
+        $data = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        return ($stmt->rowCount() > 0) ? $data[0] : array();
+    }
+    /**
+     * Set the PDO Database Object
+     *
+     * @param \PDO $db The database connection
+     * @return void
+     * @access protected
+     * @throws InvalidArgumentException if $db is not a \PDO Object
+     * @author Johnathan Pulos
+     **/
+    protected function setDatabaseObject($db)
+    {
+        if (is_a($db, 'PDO')) {
+            $this->db = $db;
+        } else {
+            throw new \InvalidArgumentException('$db must be of the class \PDO.');
+        }
+    }
+    /**
+     * Checks if the Model's table exists.  Throws an error if it is missing.
+     *
+     * @return void
+     * @access protected
+     * @author Johnathan Pulos
+     **/
+    protected function tableExists()
+    {
+        $table = $this->db->query("SHOW TABLES LIKE '" . $this->tablePrefix . $this->tableName . "'");
+        if ($table->rowCount() == 0) {
+            throw new \LogicException("The table '" . $this->tablePrefix . $this->tableName . "' is missing.");
+        }
+    }
+    /**
      * Insert a new Link Resource
      *
      * @param array $data an array of the link data to save
@@ -153,8 +215,8 @@ class Model
      **/
     protected function insertRecord($data)
     {
-        $stmt = $this->db->prepare($this->getInsertQuery());
-        $stmt = $this->bindValues($stmt, $data, 'insert');
+        $stmt = $this->db->prepare($this->getInsertQuery($data));
+        $stmt = $this->bindValues($stmt, $data);
         $saved = $stmt->execute();
         if ($saved === true) {
             $this->lastID = $this->db->lastInsertId();
@@ -164,16 +226,64 @@ class Model
         return $saved;
     }
     /**
-     * Generates the insert SQL query based on the set $accessibleAttributes class variable
+     * update the given record with the given data
      *
+     * @param array $data an array of data to update
+     * @param integer $id The id of the record to update
+     * @return boolean Did it update?
+     * @access protected
+     * @throws InvalidArgumentException if record does not exist
+     * @author Johnathan Pulos
+     **/
+    protected function updateRecord($data, $id)
+    {
+        if ($this->exists($id, $this->primaryKey) === false) {
+            throw new \InvalidArgumentException("The record with id = " . $id . " does not exist.");
+        }
+        $stmt = $this->db->prepare($this->getUpdateQuery($data));
+        $stmt = $this->bindValues($stmt, $data);
+        $stmt->bindValue(":" . $this->primaryKey, intval($id));
+        $saved = $stmt->execute();
+        if ($saved === true) {
+            $this->lastID = $id;
+        } else {
+            $this->lastID =  null;
+        }
+        return $saved;
+    }
+    /**
+     * Generates the insert SQL query based on a cleanNonWhitelistedData() data array
+     *
+     * @param array $data an array of the link data to save
      * @return string The final Query statement
      * @access protected
      * @author Johnathan Pulos
      **/
-    protected function getInsertQuery()
+    protected function getInsertQuery($data)
     {
+        $data = $this->cleanNonWhitelistedData($data);
         $query = "INSERT INTO " . $this->tablePrefix . $this->tableName . "(" .
-            implode(', ', $this->accessibleAttributes) . ") VALUES(:" . implode(', :', $this->accessibleAttributes) . ")";
+            implode(', ', array_keys($data)) . ") VALUES(:" . implode(', :', array_keys($data)) . ")";
+        return $query;
+    }
+    /**
+     * Generates the update SQL query based on a cleanNonWhitelistedData() data array
+     *
+     * @param array $data an array of the link data to save
+     * @return string The final Query statement
+     * @access protected
+     * @author Johnathan Pulos
+     **/
+    protected function getUpdateQuery($data)
+    {
+        $data = $this->cleanNonWhitelistedData($data);
+        $query = "UPDATE " . $this->tablePrefix . $this->tableName . " SET ";
+        $valueStatements = array();
+        foreach ($data as $key => $value) {
+            array_push($valueStatements, $key . " = :" . $key);
+        }
+        $query .= implode(", ", $valueStatements);
+        $query .= " WHERE " . $this->primaryKey . " = :" . $this->primaryKey;
         return $query;
     }
     /**
@@ -181,21 +291,15 @@ class Model
      *
      * @param PDOStatement $statement The statement to bind values to
      * @param array $data The data to save regarding the Resource
-     * @param string $queryType (insert, update)
      * @return \PDOStatement The statement object
      * @author Johnathan Pulos
      **/
-    protected function bindValues($statement, $data, $queryType = 'insert')
+    protected function bindValues($statement, $data)
     {
-        foreach ($this->accessibleAttributes as $attribute) {
-            if (array_key_exists($attribute, $data)) {
-                $value = $this->prepareAttribute($attribute, $data[$attribute]);
-            } else {
-                if (strtolower($queryType) == 'insert') {
-                    $value = $this->prepareAttribute($attribute, '');
-                }
-            }
-            $statement->bindValue(":" . $attribute, $value);
+        $data = $this->cleanNonWhitelistedData($data);
+        foreach ($data as $key => $value) {
+            $newValue = $this->prepareAttribute($key, $value);
+            $statement->bindValue(":" . $key, $newValue);
         }
         return $statement;
     }
@@ -211,6 +315,24 @@ class Model
     protected function prepareAttribute($key, $value)
     {
         return $value;
+    }
+    /**
+     * Removes any nonwhitelisted values from the data array
+     *
+     * @param array $data The data to clean
+     * @return array A cleaned data array
+     * @access protected
+     * @author Johnathan Pulos
+     **/
+    protected function cleanNonWhitelistedData($data)
+    {
+        $cleanedData = array();
+        foreach ($data as $key => $value) {
+            if ((in_array($key, $this->accessibleAttributes)) || ($key == $this->primaryKey)) {
+                $cleanedData[$key] = $value;
+            }
+        }
+        return $cleanedData;
     }
 
 }

@@ -67,12 +67,7 @@ class LinkTest extends \PHPUnit_Framework_TestCase
         'link_summary'              =>  '',
         'link_tags'                 =>  '',
         'social_media_id'           =>  'thththrrerkekejssisisjs1221',
-        'social_media_account'      =>  '',
-        'link_embedly_html'         =>  '',
-        'link_embedly_author'       =>  '',
-        'link_embedly_author_link'  =>  '',
-        'link_embedly_thumb_url'    =>  '',
-        'link_embedly_type'         =>  ''
+        'social_media_account'      =>  ''
     );
     /**
      * Setup the test
@@ -197,7 +192,7 @@ class LinkTest extends \PHPUnit_Framework_TestCase
     {
         $expected = $this->linkFactory;
         $expected['social_media_id'] = 'testSaveShouldAutomaticallySetTheRandomLinkKey';
-        unset($expected['link_randkey']);
+        $expected['link_randkey'] = null;
         $linkResource = $this->setUpLinkResource();
         $linkResource->save($expected);
         $statement = $this->db->query("SELECT link_randkey FROM " . $this->dbTablePrefix . "links WHERE social_media_id = 'testSaveShouldAutomaticallySetTheRandomLinkKey'");

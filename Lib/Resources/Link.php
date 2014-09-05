@@ -24,6 +24,7 @@ namespace Resources;
 
 /**
  * The Link Resource for managing links to the Pligg site
+ * @todo We need to create an update method for this class
  */
 class Link extends Model
 {
@@ -94,9 +95,11 @@ class Link extends Model
      *
      * @param \PDO $db The database connection
      * @param \Resources\Tag $tagObject The tag object
+     * @param \Resources\Total $totalObject The total object
      * @return void
      * @throws InvalidArgumentException if $db is not a \PDO Object
      * @throws InvalidArgumentException if $tagObject is not a \Resources\Tag Object
+     * @throws InvalidArgumentException if $totalObject is not a \Resources\Total Object
      * @author Johnathan Pulos
      **/
     public function __construct($db, $tagObject, $totalObject)
@@ -142,30 +145,41 @@ class Link extends Model
         }
     }
     /**
-     * Insert/Update the link in the database.  Pass an id to update.
+     * Insert the link in the database.  Pass an id to update.
      *
      * @param array $data an array of the link data to save
-     * @param integer $id the Link.link_id of the record to update
      * @return boolean Did it save the data?
      * @access public
      * @author Johnathan Pulos
-     * @todo Implement update script
      **/
-    public function save($data, $id = null)
+    public function save($data)
     {
-        if (is_null($id)) {
-            if ((!isset($data['link_summary'])) || ($data['link_summary'] == '')) {
-                $data['link_summary'] = $data['link_content'];
-            }
-            if ((!isset($data['link_title'])) || ($data['link_title'] == '')) {
-                $data['link_title'] = $this->createTitle($data['link_title'], $data['link_content']);
-            }
-            if ($saved = $this->insertRecord($data)) {
-                $this->saveTags($data);
-                $this->totalResource->increment($data['link_status']);
-            }
+        if ((!isset($data['link_summary'])) || ($data['link_summary'] == '')) {
+            $data['link_summary'] = $data['link_content'];
+        }
+        if ((!isset($data['link_title'])) || ($data['link_title'] == '')) {
+            $data['link_title'] = $this->createTitle($data['link_title'], $data['link_content']);
+        }
+        if ($saved = $this->insertRecord($data)) {
+            $this->saveTags($data);
+            $this->totalResource->increment($data['link_status']);
         }
         return $saved;
+    }
+    /**
+     * Update a record
+     *
+     * @param array $data The data to be saved
+     * @param integer $id The id of the record to save
+     * @return boolean Did it save the data?
+     * @access public
+     * @throws InvalidArgumentException if record does not exist
+     * @todo Complete the update method
+     * @author Johnathan Pulos
+     **/
+    public function update($data, $id)
+    {
+        throw new \Exception('The update() method has not been completed for this class.');
     }
     /**
      * Save the tags for the link

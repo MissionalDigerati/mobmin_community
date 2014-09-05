@@ -23,9 +23,9 @@
 namespace Resources;
 
 /**
- * The Tag Resource for managing tags to the Pligg site
+ * The TweetFeedAvatar Resource.  This requires the TweetFeed Module to be installed
  */
-class Tag extends Model
+class TweetFeedAvatar extends Model
 {
     /**
      * The table name to query
@@ -33,14 +33,14 @@ class Tag extends Model
      * @var string
      * @access protected
      **/
-    protected $tableName = 'tags';
+    protected $tableName = 'tweet_feed_avatars';
     /**
      * The primary key of the table
      *
      * @var string
      * @access protected
      **/
-    protected $primaryKey = '';
+    protected $primaryKey = 'tweet_feed_avatar_id';
     /**
      * An array of whitelisted attributes
      *
@@ -48,8 +48,19 @@ class Tag extends Model
      * @access protected
      **/
     protected $accessibleAttributes = array(
-        'tag_link_id', 'tag_date', 'tag_words'
+        'tweeter_id', 'tweeter_name', 'tweeter_avatar_url', 'last_updated'
     );
+    /**
+     * Construct the model object
+     *
+     * @param \PDO $db The database connection
+     * @return void
+     * @author Johnathan Pulos
+     **/
+    public function __construct($db)
+    {
+        parent::__construct($db);
+    }
     /**
      * prepare the attribute before binding to the PDOStatement
      *

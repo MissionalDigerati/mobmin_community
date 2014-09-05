@@ -923,4 +923,18 @@ font-size:1.4em;
 
 /************* RECAPTCHA **************/
 /* Apply the iframe class to any iframes that need to display */
-iframe.iframe {display:block} 
+iframe.iframe {display:block}
+/************* CUSTOM **************/
+div#story-loading-icon {
+    background-image: url(../img//loading.gif);
+    height: 42px;
+    width: 42px;
+    position: fixed;
+    z-index: 1000;
+    left: 50%;
+    top: 50%;
+    margin: -25px 0 0 -25px;
+}
+div.storyfooter, span.subtext {
+    font-size: 13px;
+}
