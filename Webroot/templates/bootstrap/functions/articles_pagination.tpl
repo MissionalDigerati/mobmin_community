@@ -16,6 +16,7 @@
 	{literal}
 	$(document).ready(function()
 	{
+		$('div#story-loading-icon').hide();
 		var count;
 		count=parseInt(pageSize);
 		
@@ -44,7 +45,7 @@
 					url:url,
 					data: dataString,
 					beforeSend: function() {
-						$(".stories:last").addClass("loader");
+						// $(".stories:last").addClass("loader");
 					},
 					cache: false,
 					success: function(html)	{
@@ -52,12 +53,10 @@
 						if ($.trim(html) != "") {
 							
 							$(".stories:last").after(html); 
-							$(".stories").removeClass("loader");
+							// $(".stories").removeClass("loader");
 							count=count+parseInt(pageSize);
-						} else{
-						
-							$(".stories").removeClass("loader");
 						}
+						$('div#story-loading-icon').fadeOut('slow');
 					} 
 			});
 		}; 
@@ -65,8 +64,10 @@
 	   if(Pager_setting==2){
 		$(window).scroll(function(){
 			if ($(window).scrollTop() == $(document).height() - $(window).height()){
-				if(parseInt(total_row)>=count)
-				last_msg_funtion();
+				if(parseInt(total_row)>=count) {
+					$('div#story-loading-icon').fadeIn('slow');
+					last_msg_funtion();
+				}
 			}
 		}); 
 	   }else if(Pager_setting==3){
@@ -86,3 +87,4 @@
 	});
 	{/literal}
 	</script>
+	<div id="story-loading-icon"></div>
