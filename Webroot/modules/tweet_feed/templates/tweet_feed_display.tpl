@@ -1,4 +1,4 @@
-<div class="row">
+<div class="row tweet-feed-box">
     {foreach from=$tweets item=tweet}
         <div class="post-box resizable-video col-md-12">
             <div class="powered-by-box"><img src="{$my_base_url}{$my_pligg_base}/modules/tweet_feed/assets/img/twitter/bird_blue_16.png" alt=""> Powered by Twitter</div>
@@ -19,11 +19,10 @@
                 <a href="https://twitter.com/intent/retweet?tweet_id={$tweet.tweet_id}"><i class="socialicon-twit-retweet" title="retweet"></i></a> 
                 <a href="https://twitter.com/intent/favorite?tweet_id={$tweet.tweet_id}"><i class="socialicon-twit-fav" title="favorite"></i></a>
             </div>
+            <div class="clearfix"></div>
         </div>
-        <div class="clearfix"></div>
     {/foreach}
-    <br>
-    <div class="col-md-12">
+    <div class="col-md-12 pagination-holder">
         <ul class="pagination">
             {if $pagi_current_page != 1}
                 <li><a href="/page.php?page=twitter-feed&current-page={$pagi_previous_page}">&laquo;</a></li>
@@ -32,8 +31,11 @@
                 <li{if $i == $pagi_current_page} class="active"{/if}><a href="/page.php?page=twitter-feed&current-page={$i}">{$i}</a></li>
             {/for}
             {if $pagi_current_page != $pagi_total_pages}
-                <li><a href="/page.php?page=twitter-feed&current-page={$pagi_next_page}">&raquo;</a></li>
+                <li><a href="/page.php?page=twitter-feed&current-page={$pagi_next_page}" class="next-link">&raquo;</a></li>
             {/if}
         </ul>
     </div>
 </div>
+<div class="clearfix"></div>
+<br>
+<div id="page-loading-icon"></div>
