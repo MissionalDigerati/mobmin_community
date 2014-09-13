@@ -20,7 +20,7 @@
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  * 
  */
-namespace support;
+namespace Config;
 
 /**
  * A class that holds the database settings, please rename to DatabaseSettings.php
