@@ -31,7 +31,6 @@ Webroot/avatars/user_uploaded/*.gif
 
 # Renamed .default Pligg files
 # .htaccess
-Webroot/languages/*.conf
 Webroot/libs/dbconnect.php
 Webroot/logs/
 Webroot/settings.php
