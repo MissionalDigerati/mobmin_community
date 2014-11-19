@@ -39,6 +39,7 @@ function loadTweets() {
         $(data).find('div.post-box').each(function(index, el) {
             $('div.tweet-feed-box').append(el);
         });
+        convertAllTweets();
         $('div#page-loading-icon').fadeOut('slow');
         pagination = $(data).find('ul.pagination a.next-link');
         if (pagination.length > 0) {
