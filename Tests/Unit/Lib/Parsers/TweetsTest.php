@@ -207,7 +207,7 @@ class TweetsTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($expectedTitle, $linkData[0]['link_title']);
     }
     /**
-     * parseLinksFromAPI() should set the link_title to a default if the Embedly returned data does not set it
+     * parseLinksFromAPI() should set the link_title to a default if the Embedly returned data does not set it, and set the link_status to new
      *
      * @return void
      * @access public
@@ -216,7 +216,9 @@ class TweetsTest extends \PHPUnit_Framework_TestCase
     public function testParseLinksFromAPIShouldSetADefaultLinkTitleBasedOnEmbedlyData()
     {
         $expectedTitle = 'No Title Available';
+        $expectedStatus = 'new';
         $returnedObject = new \stdClass();
+        $returnedObject->description = 'My Special Description';
         $embedlyObj = $this->getMock('\Embedly\Embedly', array('oembed'), array());
         $embedlyObj->expects($this->exactly(1))
                     ->method('oembed')
@@ -226,6 +228,7 @@ class TweetsTest extends \PHPUnit_Framework_TestCase
         $linkData = $tweetsParser->parseLinksFromAPI($this->searchTweetsSingleTweetFactory);
         $this->assertFalse(empty($linkData));
         $this->assertEquals($expectedTitle, $linkData[0]['link_title']);
+        $this->assertEquals($expectedStatus, $linkData[0]['link_status']);
     }
     /**
      * parseLinksFromAPI() should get the link_title_url based on the title provided from the Embedly returned data
@@ -300,7 +303,7 @@ class TweetsTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($expectedContent, $linkData[0]['link_summary']);
     }
     /**
-     * parseLinksFromAPI() should set the link_summary and link_content to a default description if not provided by Embedly
+     * parseLinksFromAPI() should set the link_summary and link_content to a default description if not provided by Embedly, and set the link_status = new
      *
      * @return void
      * @access public
@@ -309,7 +312,9 @@ class TweetsTest extends \PHPUnit_Framework_TestCase
     public function testParseLinksFromAPIShouldSetTheLinkContentAndSummaryToADefaultIfNoEmbedlyDescription()
     {
         $expectedContent = "No description available.";
+        $expectedStatus = 'new';
         $returnedObject = new \stdClass();
+        $returnedObject->title = 'My Special Title';
         $embedlyObj = $this->getMock('\Embedly\Embedly', array('oembed'), array());
         $embedlyObj->expects($this->exactly(1))
                     ->method('oembed')
@@ -320,6 +325,7 @@ class TweetsTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse(empty($linkData));
         $this->assertEquals($expectedContent, $linkData[0]['link_content']);
         $this->assertEquals($expectedContent, $linkData[0]['link_summary']);
+        $this->assertEquals($expectedStatus, $linkData[0]['link_status']);
     }
     /**
      * parseLinksFromAPI() should set the link_embedly_html to the html provided by Embedly

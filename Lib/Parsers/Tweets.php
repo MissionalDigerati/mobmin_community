@@ -211,6 +211,7 @@ class Tweets
                     } else {
                         $this->tweetedLinks[$linkKey]['link_title'] = 'No Title Available';
                         $this->tweetedLinks[$linkKey]['link_title_url'] = uniqid("mobmin-tweet-");
+                        $this->tweetedLinks[$linkKey]['link_status'] = 'new';
                     }
                     if ((property_exists($data, 'description')) && ($data->description != '')) {
                         $description = strip_tags($data->description);
@@ -219,6 +220,7 @@ class Tweets
                     } else {
                         $this->tweetedLinks[$linkKey]['link_content'] = 'No description available.';
                         $this->tweetedLinks[$linkKey]['link_summary'] = 'No description available.';
+                        $this->tweetedLinks[$linkKey]['link_status'] = 'new';
                     }
                     if ((property_exists($data, 'html')) && ($data->html != '')) {
                         $this->tweetedLinks[$linkKey]['link_embedly_html'] = $data->html;
