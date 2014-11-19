@@ -22,28 +22,28 @@ $RECYCLE.BIN/
 #
 
 # Uploaded Avatars
-webroot/avatars/groups_uploaded/*.jpg
-webroot/avatars/groups_uploaded/*.png
-webroot/avatars/groups_uploaded/*.gif
-webroot/avatars/user_uploaded/*.jpg
-webroot/avatars/user_uploaded/*.png
-webroot/avatars/user_uploaded/*.gif
+Webroot/avatars/groups_uploaded/*.jpg
+Webroot/avatars/groups_uploaded/*.png
+Webroot/avatars/groups_uploaded/*.gif
+Webroot/avatars/user_uploaded/*.jpg
+Webroot/avatars/user_uploaded/*.png
+Webroot/avatars/user_uploaded/*.gif
 
 # Renamed .default Pligg files
 # .htaccess
-webroot/languages/*.conf
-webroot/libs/dbconnect.php
-webroot/logs/
-webroot/settings.php
+Webroot/languages/*.conf
+Webroot/libs/dbconnect.php
+Webroot/logs/
+Webroot/settings.php
 
 
 # Upload module attachments
-webroot/modules/upload/attachments/*.jpg
-webroot/modules/upload/attachments/*.png
-webroot/modules/upload/attachments/*.gif
-webroot/modules/upload/attachments/thumbs/*.jpg
-webroot/modules/upload/attachments/thumbs/*.png
-webroot/modules/upload/attachments/thumbs/*.gif
+Webroot/modules/upload/attachments/*.jpg
+Webroot/modules/upload/attachments/*.png
+Webroot/modules/upload/attachments/*.gif
+Webroot/modules/upload/attachments/thumbs/*.jpg
+Webroot/modules/upload/attachments/thumbs/*.png
+Webroot/modules/upload/attachments/thumbs/*.gif
 
 
 # All .log files

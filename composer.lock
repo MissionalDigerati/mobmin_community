@@ -4,7 +4,7 @@
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "d34bfc98cb89c48ac401939fbb9623c3",
+    "hash": "9796eceda5fe3d2f686cb8d1f8581b3e",
     "packages": [
         {
             "name": "aura/autoload",
@@ -111,16 +111,16 @@
         },
         {
             "name": "cocur/slugify",
-            "version": "v0.10",
+            "version": "v0.10.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/cocur/slugify.git",
-                "reference": "69c2d2db3b5212a3a449ea8d01fae34d4438ca43"
+                "reference": "56b8981e5ea194c1033eabcadcf6004679d54c23"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/cocur/slugify/zipball/69c2d2db3b5212a3a449ea8d01fae34d4438ca43",
-                "reference": "69c2d2db3b5212a3a449ea8d01fae34d4438ca43",
+                "url": "https://api.github.com/repos/cocur/slugify/zipball/56b8981e5ea194c1033eabcadcf6004679d54c23",
+                "reference": "56b8981e5ea194c1033eabcadcf6004679d54c23",
                 "shasum": ""
             },
             "require": {
@@ -164,7 +164,7 @@
                 "slug",
                 "slugify"
             ],
-            "time": "2014-08-26 19:17:51"
+            "time": "2014-09-01 21:06:00"
         },
         {
             "name": "embedly/embedly-php",
@@ -217,12 +217,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/ricardoper/TwitterOAuth.git",
-                "reference": "44a951997cd605dbbc602553c2d20f6ec465d51c"
+                "reference": "c9fd4755efa9a2394f7a35c1ceed315fc24c6446"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ricardoper/TwitterOAuth/zipball/44a951997cd605dbbc602553c2d20f6ec465d51c",
-                "reference": "44a951997cd605dbbc602553c2d20f6ec465d51c",
+                "url": "https://api.github.com/repos/ricardoper/TwitterOAuth/zipball/c9fd4755efa9a2394f7a35c1ceed315fc24c6446",
+                "reference": "c9fd4755efa9a2394f7a35c1ceed315fc24c6446",
                 "shasum": ""
             },
             "require": {
@@ -254,7 +254,7 @@
                 "php",
                 "twitter"
             ],
-            "time": "2014-08-19 11:26:03"
+            "time": "2014-09-09 15:44:14"
         }
     ],
     "packages-dev": [
