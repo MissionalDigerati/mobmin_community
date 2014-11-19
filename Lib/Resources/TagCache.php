@@ -63,9 +63,9 @@ class TagCache extends Model
          *
          * @author Johnathan Pulos
          **/
-        $this->db->query("DELETE FROM " . $this->dbTablePrefix . "tag_cache");
-        $sql = "INSERT INTO " . $this->dbTablePrefix . "tag_cache select tag_words, count(DISTINCT link_id) as count " .
-        "FROM " . $this->dbTablePrefix . "tags, " . $this->dbTablePrefix . "links WHERE tag_lang='en' and " .
+        $this->db->query("DELETE FROM " . $this->tablePrefix . "tag_cache");
+        $sql = "INSERT INTO " . $this->tablePrefix . "tag_cache select tag_words, count(DISTINCT link_id) as count " .
+        "FROM " . $this->tablePrefix . "tags, " . $this->tablePrefix . "links WHERE tag_lang='en' and " .
         "link_id = tag_link_id and (link_status='published' OR link_status='new') GROUP BY tag_words order by count desc";
         $this->db->query($sql);
     }
