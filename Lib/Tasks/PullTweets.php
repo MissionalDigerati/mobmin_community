@@ -113,6 +113,7 @@ $slugify = new \Cocur\Slugify\Slugify();
 $loader->add("Resources\Model", $libDirectory);
 $loader->add("Resources\Link", $libDirectory);
 $loader->add("Resources\Tag", $libDirectory);
+$loader->add("Resources\TagCache", $libDirectory);
 $loader->add("Resources\Total", $libDirectory);
 $loader->add("Resources\TweetFeed", $libDirectory);
 $loader->add("Resources\TweetFeedAvatar", $libDirectory);
@@ -266,4 +267,17 @@ foreach ($links as $link) {
             }
         }
     }
+}
+/**
+ * Update the Tag Cache
+ *
+ * @author Johnathan Pulos
+ **/
+try {
+    $tagCacheResource = new \Resources\TagCache($mysqlDatabase);
+    $tagCacheResource->reset();
+    echo "The Tag Cache has been updated!\r\n";  
+}  catch (Exception $e) {
+    echo "There was a problem updating the Tag Cache!\r\n";
+    echo "Error: " . $e->getMessage() . "\r\n";
 }
