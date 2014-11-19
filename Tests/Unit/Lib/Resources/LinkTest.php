@@ -82,9 +82,8 @@ class LinkTest extends \PHPUnit_Framework_TestCase
         $this->linkFactory['link_modified'] = $today;
         $this->linkFactory['link_date'] = $today;
         $this->linkFactory['link_published_date'] = $today;
-
         $pdoDb = \PHPToolbox\PDODatabase\PDODatabaseConnect::getInstance();
-        $dbSettings = new \Support\DatabaseSettings();
+        $dbSettings = new \Config\DatabaseSettings();
         $this->dbTablePrefix = $dbSettings->default['table_prefix'];
         $pdoDb->setDatabaseSettings($dbSettings);
         $this->db = $pdoDb->getDatabaseInstance();
