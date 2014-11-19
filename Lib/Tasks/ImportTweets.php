@@ -20,6 +20,12 @@
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  * 
  */
+/**
+ * Set the default date timezone
+ *
+ * @author Johnathan Pulos
+ */
+date_default_timezone_set('America/Los_Angeles');
  /**
   * This script imports the Tweets from a PostGres database into the Pligg Engine
   */
