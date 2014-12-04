@@ -27,7 +27,7 @@
  */
 date_default_timezone_set('America/Los_Angeles');
  /**
-  * This script imports the Tweets from a PostGres database into the Pligg Engine
+  * This script pulls the latests tweets
   */
 $DS = DIRECTORY_SEPARATOR;
 $rootDirectory = __DIR__ . $DS . ".." . $DS . "..";
@@ -42,6 +42,10 @@ $pliggUsername = 'MobMin';
  * SET THIS TO THE CATEGORY ID THAT THESE STORIES WILL BE ATTRIBUTED TO
  */
 $pliggCategory = 1;
+/**
+ * SET THIS TO THE MAXIMUM NUMBER OF LINKS THAT CAN BE SENT TO EMBEDLY
+ */
+$embedlyMaxLinks = 20;
 /**
  * Load up the Aura
  *
@@ -62,11 +66,28 @@ $loader->setMode(\Aura\Autoload\Loader::MODE_SILENT);
  */
 $loader->add("Config\DatabaseSettings", $rootDirectory);
 /**
+ * Setup the Embedly settings object
+ *
+ * @author Johnathan Pulos
+ */
+$loader->add("Config\EmbedlySettings", $rootDirectory);
+/**
  * Autoload the PDO Database Class
  *
  * @author Johnathan Pulos
  */
 $loader->add("PHPToolbox\PDODatabase\PDODatabaseConnect", $PHPToolboxDirectory);
+/**
+ * Autoload Embedly Library
+ */
+$loader->add("Embedly\Embedly", $vendorDirectory . "embedly" . $DS . "embedly-php" . $DS . "src");
+$embedlySettings = new \Config\EmbedlySettings();
+/**
+ * Autoload the slugify library
+ */
+$loader->setClass("Cocur\Slugify\Slugify", $vendorDirectory . "cocur" . $DS . "slugify" . $DS . "src" . $DS . "Slugify.php");
+$loader->setClass("Cocur\Slugify\SlugifyInterface", $vendorDirectory . "cocur" . $DS . "slugify" . $DS . "src" . $DS . "SlugifyInterface.php");
+$slugify = new \Cocur\Slugify\Slugify();
 /**
  * Autoload the lib classes
  *
@@ -75,22 +96,34 @@ $loader->add("PHPToolbox\PDODatabase\PDODatabaseConnect", $PHPToolboxDirectory);
 $loader->add("Resources\Model", $libDirectory);
 $loader->add("Resources\Link", $libDirectory);
 $loader->add("Resources\Tag", $libDirectory);
+$loader->add("Resources\TagCache", $libDirectory);
 $loader->add("Resources\Total", $libDirectory);
+$loader->add("Resources\TweetFeed", $libDirectory);
+$loader->add("Resources\TweetFeedAvatar", $libDirectory);
 $loader->add("Resources\User", $libDirectory);
-/**
- * Grab the PostGres Data
- */
-$dbSettings = new \Config\DatabaseSettings();
-$postGresSettings = $dbSettings->postgres;
-$pgDatabase = new PDO("pgsql:dbname=" . $postGresSettings['name'] . ";host=" . $postGresSettings['host'] . ";");
-$statement = $pgDatabase->query("SELECT * FROM social_media");
-$data = $statement->fetchAll(\PDO::FETCH_ASSOC);
+$loader->add("Parsers\Tweets", $libDirectory);
 /**
  * Setup the mysql database
  */
+$dbSettings = new \Config\DatabaseSettings();
 $PDOClass = \PHPToolbox\PDODatabase\PDODatabaseConnect::getInstance();
 $PDOClass->setDatabaseSettings($dbSettings);
 $mysqlDatabase = $PDOClass->getDatabaseInstance();
+/**
+ * Grab the PostGres Data
+ */
+$postGresSettings = $dbSettings->postgres;
+$pgDatabase = new PDO("pgsql:dbname=" . $postGresSettings['name'] . ";host=" . $postGresSettings['host'] . ";");
+$statement = $pgDatabase->query("SELECT * FROM social_media");
+$pgData = $statement->fetchAll(\PDO::FETCH_ASSOC);
+/**
+ * Set the avatar for each item
+ */
+foreach ($pgData as $key => $val) {
+    $statement = $pgDatabase->query("SELECT * FROM social_avatars WHERE (social_avatars.provider = 'twitterhash' and social_avatars.account = '" . $val['account'] . "') LIMIT 1");
+    $avatar = $statement->fetchAll(\PDO::FETCH_ASSOC);
+    $pgData[$key]['avatar'] = $avatar[0];
+}
 /**
  * Grab the user who will get all the tweets attached
  */
@@ -103,80 +136,47 @@ $pliggUserData = $userResource->findByUserLogin($pliggUsername);
 $linkResource = new \Resources\Link($mysqlDatabase, new \Resources\Tag($mysqlDatabase), new \Resources\Total($mysqlDatabase));
 $linkResource->setTablePrefix($dbSettings->default['table_prefix']);
 /**
- * Iterate over all the Tweets
+ * Instantiate the TweetFeed classes
  */
-foreach ($data as $tweet) {
-    $tweetLinks = array();
-    $tweetHashTags =array();
-    $tweetMentions = array();
+$tweetFeedResource = new \Resources\TweetFeed($mysqlDatabase);
+$tweetFeedResource->setTablePrefix($dbSettings->default['table_prefix']);
+$tweetFeedAvatarResource = new \Resources\TweetFeedAvatar($mysqlDatabase);
+$tweetFeedAvatarResource->setTablePrefix($dbSettings->default['table_prefix']);
+/**
+ * Iterate over the data, save the tweets, and setup links for parsing
+ */
+$linksToProcess = array();
+foreach ($pgData as $tweet) {
     /**
-     * Parse the content to get the data we need
+     * Check if the tweet was added to the TweetFeed Module
      */
-    $dom = new domDocument;
-    $dom->loadHTML($tweet['content']);
-
-    $linkAuthor = $tweet['account'];
-    $linkContent = strip_tags($tweet['content']);
-    $linkProviderId = $tweet['provider_id'];
-    $tweetedOn = new DateTime($tweet['provider_created_datetime']);
-    // echo $tweetedOn->format('Y-m-d H:i:s');
-    /**
-     * Iterate over the links
-     */
-    $links = $dom->getElementsByTagName('a');
-    foreach ($links as $link) {
+    if ($tweetFeedResource->exists($tweet['provider_id'], 'tweet_id') === false) {
+        $errorSaving = false;
+        $today = new DateTime();
+        $tweetedOn = new DateTime($tweet['provider_created_datetime']);
         /**
-         * Check the classes of the link, to determine the type of link
+         * Parse the content to get the data we need
          */
-        $linkClasses = array();
-        $classNode = $link->attributes->getNamedItem('class');
-        if ($classNode) {
-            $linkClasses = explode(' ', $link->attributes->getNamedItem('class')->value);
-        }
-        $linkText = $link->nodeValue;
-        if (in_array('username', $linkClasses)) {
-            array_push($tweetMentions, $linkText);
-        } elseif (in_array('hashtag', $linkClasses)) {
-            array_push($tweetHashTags, ltrim($linkText, '#'));
-        } else {
-            array_push($tweetLinks, $linkText);
-        }
-    }
-    $linkCount = 1;
-    foreach ($tweetLinks as $tweetLink) {
-        $titleSlug = "mobmin-tweet-" . $linkProviderId;
-        if ($linkCount > 1) {
-            $titleSlug .= "-" . $linkCount;
-        }
-        $linkTags = implode(',', $tweetHashTags);
-        $linkData = array(
-            'link_author'           =>  $pliggUserData[0]['user_id'],
-            'link_status'           =>  'published',
-            'link_randkey'          =>  0,
-            'link_votes'            =>  1,
-            'link_karma'            =>  1,
-            'link_modified'         =>  '',
-            'link_date'             =>  $tweetedOn->format("Y-m-d H:i:s"),
-            'link_published_date'   =>  $tweetedOn->format("Y-m-d H:i:s"),
-            'link_category'         =>  $pliggCategory,
-            'link_url'              =>  $tweetLink,
-            'link_url_title'        =>  '',
-            'link_title'            =>  '',
-            'link_title_url'        =>  $titleSlug,
-            'link_content'          =>  $linkContent,
-            'link_summary'          =>  '',
-            'link_tags'             =>  $linkTags,
-            'social_media_id'       =>  $linkProviderId,
-            'social_media_account'  =>  $linkAuthor
+        $dom = new domDocument;
+        $dom->loadHTML($tweet['content']);
+        $tweetData = array(
+            'tweet_id'          =>  $tweet['provider_id'],
+            'tweeter_id'        =>  '',
+            'tweeter_name'      =>  $tweet['account'],
+            'content'           =>  strip_tags($tweet['content']),
+            'published_date'    =>  $tweetedOn->format("Y-m-d H:i:s")
         );
         try {
-            $linkResource->save($linkData);
-            echo "Inserted the tweet from " . $linkAuthor . " tweeted on " . $tweetedOn->format("Y-m-d H:i:s") . "\r\n";
+            $tweetFeedResource->save($tweetData);
+            echo "Saved the tweet posted by " . $tweetData['tweeter_name'] . " on " . $tweetedOn->format("Y-m-d H:i:s") . "\r\n";
         } catch (Exception $e) {
-            echo "There was a problem iserting from " . $linkAuthor . " tweeted on " . $tweetedOn->format("Y-m-d H:i:s") . "\r\n";
-            echo "Error: " . $e->getMessage();
+            echo "Unable to save the tweet posted by " . $tweetData['tweeter_name'] . " on " . $tweetedOn->format("Y-m-d H:i:s") . "\r\n";
+            echo "Error: " . $e->getMessage() . "\r\n";
+            $errorSaving = true;
         }
-        $linkCount++;
+        if ($errorSaving === false) {
+
+        }
     }
 }
 
