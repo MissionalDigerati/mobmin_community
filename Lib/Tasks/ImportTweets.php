@@ -178,10 +178,11 @@ $tweetFeedResource = new \Resources\TweetFeed($mysqlDatabase);
 $tweetFeedResource->setTablePrefix($dbSettings->default['table_prefix']);
 $tweetFeedAvatarResource = new \Resources\TweetFeedAvatar($mysqlDatabase);
 $tweetFeedAvatarResource->setTablePrefix($dbSettings->default['table_prefix']);
+$allLinksToProcess = array();
 /**
- * Iterate over the data, save the tweets, and setup links for parsing
+ * Stores all the data of the links to be processed
  */
-$linksToProcess = array();
+$allLinkData = array();
 $linkDefaults =  array(
     'link_author'   =>  $pliggUserData[0]['user_id'],
     'link_status'   =>  'published',
@@ -191,6 +192,9 @@ $linkDefaults =  array(
     'link_modified' =>  '',
     'link_category' =>  $pliggCategory
 );
+/**
+ * Iterate over the data, save the tweets, and setup links for parsing
+ */
 foreach ($pgData as $tweet) {
     /**
      * Check if the tweet was added to the TweetFeed Module
@@ -292,7 +296,8 @@ foreach ($pgData as $tweet) {
                     /**
                      * Store in an array so we can process with Embedly
                      */
-                    array_push($linksToProcess, $mergedLinkData);
+                    array_push($allLinkData, $mergedLinkData);
+                    array_push($allLinksToProcess, $mergedLinkData['link_url']);
                 }
             }
         } else {
@@ -300,5 +305,110 @@ foreach ($pgData as $tweet) {
         }
     }
 }
-print_r($linksToProcess);
+/**
+ * Now send the links off to Embedly to get the code
+ */
+/**
+ * Now intialize the parser, and have it prepare all the links for the database
+ */
+$embedlyAPI = new \Embedly\Embedly(array('key'   =>  $embedlySettings->APIKey));
+$embedlyLinkData = array();
+$chunks = array_chunk($allLinksToProcess, 20);
+$chunkCount = 1;
+foreach ($chunks as $chunk) {
+    echo "Processing Chunk #" . $chunkCount . "\r\n";
+    $data = $embedlyAPI->oembed(array('urls' =>  $chunk));
+    foreach ($data as $key => $linkData) {
+        $linkData->original_url = $chunk[$key];
+        array_push($embedlyLinkData, $linkData);
+    }
+    $chunkCount++;
+}
+/**
+ * Now iterate over all the link data, merge it, and save it
+ */
+foreach ($allLinkData as $linkKey => $link) {
+    foreach ($embedlyLinkData as $data) {
+        /**
+         * We have the correct data for the link
+         */
+        if ($data->original_url == $link['link_url']) {
+            if ((property_exists($data, 'title')) && ($data->title != '')) {
+                $title = strip_tags($data->title);
+                $allLinkData[$linkKey]['link_title'] = $title;
+                $allLinkData[$linkKey]['link_title_url'] = $slugify->slugify($title);
+            } else {
+                $allLinkData[$linkKey]['link_title'] = 'No Title Available';
+                $allLinkData[$linkKey]['link_title_url'] = uniqid("mobmin-tweet-");
+                $allLinkData[$linkKey]['link_status'] = 'new';
+            }
+            if ((property_exists($data, 'description')) && ($data->description != '')) {
+                $description = strip_tags($data->description);
+                $allLinkData[$linkKey]['link_content'] = $description;
+                $allLinkData[$linkKey]['link_summary'] = $description;
+            } else {
+                $allLinkData[$linkKey]['link_content'] = 'No description available.';
+                $allLinkData[$linkKey]['link_summary'] = 'No description available.';
+                $allLinkData[$linkKey]['link_status'] = 'new';
+            }
+            if ((property_exists($data, 'html')) && ($data->html != '')) {
+                $allLinkData[$linkKey]['link_embedly_html'] = $data->html;
+            } else {
+                $allLinkData[$linkKey]['link_embedly_html'] = '';
+            }
+            if ((property_exists($data, 'author_name')) && ($data->author_name != '')) {
+                $allLinkData[$linkKey]['link_embedly_author'] = $data->author_name;
+            } else {
+                $allLinkData[$linkKey]['link_embedly_author'] = '';
+            }
+            if ((property_exists($data, 'author_url')) && ($data->author_url != '')) {
+                $allLinkData[$linkKey]['link_embedly_author_link'] = $data->author_url;
+            } else {
+                $allLinkData[$linkKey]['link_embedly_author_link'] = '';
+            }
+            if ((property_exists($data, 'thumbnail_url')) && ($data->thumbnail_url != '')) {
+                $allLinkData[$linkKey]['link_embedly_thumb_url'] = $data->thumbnail_url;
+            } else {
+                $allLinkData[$linkKey]['link_embedly_thumb_url'] = '';
+            }
+            if ((property_exists($data, 'type')) && ($data->type != '')) {
+                $allLinkData[$linkKey]['link_embedly_type'] = $data->type;
+            } else {
+                $allLinkData[$linkKey]['link_embedly_type'] = 'link';
+            }
+        }
+    }
+    /**
+     * Save the link data
+     */
+    if ($linkResource->exists($allLinkData[$linkKey]['link_url'], 'link_url') === false) {
+        if ($allLinkData[$linkKey]['link_embedly_type'] == 'error') {
+            echo "This link " . $allLinkData[$linkKey]['link_url'] . " returned an error.\r\n";
+        } else {
+            /**
+             * Now save the link and break out of this loop
+             */
+            try {
+                $linkResource->save($allLinkData[$linkKey]);
+                echo "Inserted the link '" . $allLinkData[$linkKey]['link_url'] . "' titled '" . $allLinkData[$linkKey]['link_title'] . "'\r\n";
+            } catch (Exception $e) {
+                echo "There was a problem inserting the link '" . $allLinkData[$linkKey]['link_url'] . "' titled '" . $allLinkData[$linkKey]['link_title'] . "'\r\n";
+                echo "Error: " . $e->getMessage() . "\r\n";
+            }
+        }
+    }
+}
+/**
+ * Update the Tag Cache
+ *
+ * @author Johnathan Pulos
+ **/
+try {
+    $tagCacheResource = new \Resources\TagCache($mysqlDatabase);
+    $tagCacheResource->reset();
+    echo "The Tag Cache has been updated!\r\n";  
+}  catch (Exception $e) {
+    echo "There was a problem updating the Tag Cache!\r\n";
+    echo "Error: " . $e->getMessage() . "\r\n";
+}
 
