@@ -66,6 +66,12 @@ $loader->setMode(\Aura\Autoload\Loader::MODE_SILENT);
  */
 $loader->add("Config\DatabaseSettings", $rootDirectory);
 /**
+ * Setup the Twitter settings object
+ *
+ * @author Johnathan Pulos
+ */
+$loader->add("Config\TwitterSettings", $rootDirectory);
+/**
  * Setup the Embedly settings object
  *
  * @author Johnathan Pulos
@@ -77,6 +83,13 @@ $loader->add("Config\EmbedlySettings", $rootDirectory);
  * @author Johnathan Pulos
  */
 $loader->add("PHPToolbox\PDODatabase\PDODatabaseConnect", $PHPToolboxDirectory);
+/**
+ * Autoload the Twitter OAuth
+ *
+ * @author Johnathan Pulos
+ */
+$loader->add("TwitterOAuth\TwitterOAuth", $vendorDirectory . "ricardoper" . $DS . "twitteroauth");
+$loader->add("TwitterOAuth\Exception\TwitterException", $vendorDirectory . "ricardoper" . $DS . "twitteroauth");
 /**
  * Autoload Embedly Library
  */
@@ -103,6 +116,11 @@ $loader->add("Resources\TweetFeedAvatar", $libDirectory);
 $loader->add("Resources\User", $libDirectory);
 $loader->add("Parsers\Tweets", $libDirectory);
 /**
+ * Connect OAuth to get tokens
+ */
+$twitterSettings = new \Config\TwitterSettings();
+$twitterRequest = new \TwitterOAuth\TwitterOAuth($twitterSettings->config);
+/**
  * Setup the mysql database
  */
 $dbSettings = new \Config\DatabaseSettings();
@@ -119,10 +137,28 @@ $pgData = $statement->fetchAll(\PDO::FETCH_ASSOC);
 /**
  * Set the avatar for each item
  */
+$screenNames = array();
 foreach ($pgData as $key => $val) {
     $statement = $pgDatabase->query("SELECT * FROM social_avatars WHERE (social_avatars.provider = 'twitterhash' and social_avatars.account = '" . $val['account'] . "') LIMIT 1");
     $avatar = $statement->fetchAll(\PDO::FETCH_ASSOC);
     $pgData[$key]['avatar'] = $avatar[0];
+    if (!in_array($val['account'], $screenNames)) {
+        array_push($screenNames, $val['account']);
+    }
+}
+/**
+ * Grab the Tweeter Id's from Twitter
+ */
+$screenNamesAndIds = array();
+$chunks = array_chunk($screenNames, 100);
+$chunkCount = 1;
+foreach ($chunks as $chunk) {
+    $screenNamesAsString = implode(",", $chunk);
+    $params = array('screen_name' => $screenNamesAsString);
+    $response = $twitterRequest->get('users/lookup', $params);
+    foreach ($response as $userData) {
+        $screenNamesAndIds[$userData->screen_name] = $userData->id_str;
+    }
 }
 /**
  * Grab the user who will get all the tweets attached
@@ -155,27 +191,37 @@ foreach ($pgData as $tweet) {
         $today = new DateTime();
         $tweetedOn = new DateTime($tweet['provider_created_datetime']);
         /**
+         * Grab the users Twitter.id
+         */
+
+        /**
          * Parse the content to get the data we need
          */
         $dom = new domDocument;
         $dom->loadHTML($tweet['content']);
         $tweetData = array(
             'tweet_id'          =>  $tweet['provider_id'],
-            'tweeter_id'        =>  '',
+            'tweeter_id'        =>  $screenNamesAndIds[$tweet['account']],
             'tweeter_name'      =>  $tweet['account'],
             'content'           =>  strip_tags($tweet['content']),
             'published_date'    =>  $tweetedOn->format("Y-m-d H:i:s")
         );
+        print_r($tweetData);
         try {
-            $tweetFeedResource->save($tweetData);
-            echo "Saved the tweet posted by " . $tweetData['tweeter_name'] . " on " . $tweetedOn->format("Y-m-d H:i:s") . "\r\n";
+            //$tweetFeedResource->save($tweetData);
+            //echo "Saved the tweet posted by " . $tweetData['tweeter_name'] . " on " . $tweetedOn->format("Y-m-d H:i:s") . "\r\n";
         } catch (Exception $e) {
             echo "Unable to save the tweet posted by " . $tweetData['tweeter_name'] . " on " . $tweetedOn->format("Y-m-d H:i:s") . "\r\n";
             echo "Error: " . $e->getMessage() . "\r\n";
             $errorSaving = true;
         }
         if ($errorSaving === false) {
-
+            /**
+             * If they do not have an avatar, we want to insert it.  Any avatars that already exist are probably outdated since these are older tweets. 
+             */
+            if ($tweetFeedAvatarResource->exists($tweet['account'], 'tweeter_name') === false) {
+            
+            }
         }
     }
 }
