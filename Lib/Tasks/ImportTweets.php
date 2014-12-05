@@ -199,29 +199,51 @@ foreach ($pgData as $tweet) {
          */
         $dom = new domDocument;
         $dom->loadHTML($tweet['content']);
-        $tweetData = array(
-            'tweet_id'          =>  $tweet['provider_id'],
-            'tweeter_id'        =>  $screenNamesAndIds[$tweet['account']],
-            'tweeter_name'      =>  $tweet['account'],
-            'content'           =>  strip_tags($tweet['content']),
-            'published_date'    =>  $tweetedOn->format("Y-m-d H:i:s")
-        );
-        print_r($tweetData);
-        try {
-            //$tweetFeedResource->save($tweetData);
-            //echo "Saved the tweet posted by " . $tweetData['tweeter_name'] . " on " . $tweetedOn->format("Y-m-d H:i:s") . "\r\n";
-        } catch (Exception $e) {
-            echo "Unable to save the tweet posted by " . $tweetData['tweeter_name'] . " on " . $tweetedOn->format("Y-m-d H:i:s") . "\r\n";
-            echo "Error: " . $e->getMessage() . "\r\n";
-            $errorSaving = true;
-        }
-        if ($errorSaving === false) {
-            /**
-             * If they do not have an avatar, we want to insert it.  Any avatars that already exist are probably outdated since these are older tweets. 
-             */
-            if ($tweetFeedAvatarResource->exists($tweet['account'], 'tweeter_name') === false) {
-            
+        /**
+         * Check if we have a Twitter id!  If we do not the account does not exist anymore, so ignore the tweet.
+         */
+        if (array_key_exists($tweet['account'], $screenNamesAndIds)) {
+            $tweeterId = $screenNamesAndIds[$tweet['account']];
+            $tweetData = array(
+                'tweet_id'          =>  $tweet['provider_id'],
+                'tweeter_id'        =>  $tweeterId,
+                'tweeter_name'      =>  $tweet['account'],
+                'content'           =>  strip_tags($tweet['content']),
+                'published_date'    =>  $tweetedOn->format("Y-m-d H:i:s")
+            );
+            try {
+                $tweetFeedResource->save($tweetData);
+                echo "Saved the tweet posted by " . $tweetData['tweeter_name'] . " on " . $tweetedOn->format("Y-m-d H:i:s") . "\r\n";
+            } catch (Exception $e) {
+                echo "Unable to save the tweet posted by " . $tweetData['tweeter_name'] . " on " . $tweetedOn->format("Y-m-d H:i:s") . "\r\n";
+                echo "Error: " . $e->getMessage() . "\r\n";
+                $errorSaving = true;
             }
+            if ($errorSaving === false) {
+                /**
+                 * If they do not have an avatar, we want to insert it.  Any avatars that already exist are probably outdated since these are older tweets. 
+                 */
+                if ($tweetFeedAvatarResource->exists($tweeterId, 'tweeter_id') === false) {
+                    /**
+                     * Save the avatar
+                     */
+                    $tweetAvatarData = array(
+                        'tweeter_id'            =>  $tweeterId,
+                        'tweeter_name'          =>  $tweet['account'],
+                        'tweeter_avatar_url'    =>  $tweet['avatar']['avatar_url'],
+                        'last_updated'          =>  $today->format("Y-m-d H:i:s")
+                    );
+                    try {
+                        $tweetFeedAvatarResource->save($tweetAvatarData);
+                        echo "Saved the tweet avatar for " . $tweet['account'] . "\r\n";
+                    } catch (Exception $e) {
+                        echo "Unable to save the tweet avatar for " . $tweet['account'] . "\r\n";
+                        echo "Error: " . $e->getMessage() . "\r\n";
+                    }
+                }
+            }
+        } else {
+            echo "We are missing an ID for the account: " . $tweet['account'] . "\r\n";
         }
     }
 }
