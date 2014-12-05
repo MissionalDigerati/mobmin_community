@@ -182,6 +182,15 @@ $tweetFeedAvatarResource->setTablePrefix($dbSettings->default['table_prefix']);
  * Iterate over the data, save the tweets, and setup links for parsing
  */
 $linksToProcess = array();
+$linkDefaults =  array(
+    'link_author'   =>  $pliggUserData[0]['user_id'],
+    'link_status'   =>  'published',
+    'link_randkey'  =>  0,
+    'link_votes'    =>  0,
+    'link_karma'    =>  0,
+    'link_modified' =>  '',
+    'link_category' =>  $pliggCategory
+);
 foreach ($pgData as $tweet) {
     /**
      * Check if the tweet was added to the TweetFeed Module
@@ -242,9 +251,54 @@ foreach ($pgData as $tweet) {
                     }
                 }
             }
+            /**
+             * Now we need to grab all the links and process them
+             */
+            $tweetLinks = array();
+            $tweetHashTags =array();
+            $links = $dom->getElementsByTagName('a');
+            foreach ($links as $link) {
+                /**
+                 * Check the classes of the link, to determine the type of link and store it
+                 */
+                $linkClasses = array();
+                $classNode = $link->attributes->getNamedItem('class');
+                if ($classNode) {
+                    $linkClasses = explode(' ', $link->attributes->getNamedItem('class')->value);
+                }
+                $linkText = $link->nodeValue;
+                if (in_array('username', $linkClasses)) {
+                    /**
+                     * Do Nothing with mentions
+                     */
+                } elseif (in_array('hashtag', $linkClasses)) {
+                    array_push($tweetHashTags, ltrim($linkText, '#'));
+                } else {
+                    array_push($tweetLinks, $linkText);
+                }
+            }
+            if (!empty($tweetLinks)) {
+                foreach ($tweetLinks as $tweetLink) {
+
+                    $linkData = array(
+                        "link_url"              =>  $tweetLink,
+                        "social_media_id"       =>  $tweet['provider_id'],
+                        "social_media_account"  =>  $tweet['account'],
+                        "link_date"             =>  $tweetedOn->format("Y-m-d H:i:s"),
+                        "link_published_date"   =>  $tweetedOn->format("Y-m-d H:i:s"),
+                        "link_tags"             =>  implode(",", $tweetHashTags)
+                    );
+                    $mergedLinkData = array_merge($linkData, $linkDefaults);
+                    /**
+                     * Store in an array so we can process with Embedly
+                     */
+                    array_push($linksToProcess, $mergedLinkData);
+                }
+            }
         } else {
             echo "We are missing an ID for the account: " . $tweet['account'] . "\r\n";
         }
     }
 }
+print_r($linksToProcess);
 
