@@ -3,10 +3,10 @@
         "vendor-dir": "Vendor"
     },
     "require": {
-        "Aura/Autoload": "dev-master",
-        "ricardoper/twitteroauth": "dev-master",
+        "ricardoper/twitteroauth": "^1.1.1",
         "embedly/embedly-php": "dev-master",
-        "cocur/slugify": "@stable"
+        "cocur/slugify": "@stable",
+				"aura/autoload": "^1.0"
     },
 	"require-dev": {
 		"phpunit/phpunit": "^4.8"
