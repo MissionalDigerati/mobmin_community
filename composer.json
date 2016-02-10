@@ -1,0 +1,14 @@
+{
+	"config": {
+        "vendor-dir": "Vendor"
+    },
+    "require": {
+        "Aura/Autoload": "dev-master",
+        "ricardoper/twitteroauth": "dev-master",
+        "embedly/embedly-php": "dev-master",
+        "cocur/slugify": "@stable"
+    },
+	"require-dev": {
+		"phpunit/phpunit": "^4.8"
+	}
+}

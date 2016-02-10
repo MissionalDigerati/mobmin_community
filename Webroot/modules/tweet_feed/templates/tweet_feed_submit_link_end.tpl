@@ -1,0 +1,1 @@
+<li{if $twitter_feed_current} class="active"{/if}><a href="/page.php?page=twitter-feed"><span>Twitter Feed</span></a></li>
