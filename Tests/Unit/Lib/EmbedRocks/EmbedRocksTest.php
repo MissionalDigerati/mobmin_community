@@ -30,6 +30,26 @@ namespace Tests\Unit\Lib\EmbedRocks;
 class EmbedRocksTest extends \PHPUnit_Framework_TestCase
 {
     /**
+     * A JSON Object that represents the response of Embed Rocks
+     *
+     * @var Object
+     * @access private
+     **/
+    private $embedRocksFactory;
+    /**
+     * Setup the testing
+     *
+     * @return void
+     * @access public
+     * @author Johnathan Pulos
+     **/
+    public function setUp()
+    {
+        $DS = DIRECTORY_SEPARATOR;
+        $jsonFile = __DIR__ . $DS . ".." . $DS . ".." . $DS . ".." . $DS . "Support" . $DS . "Factories" . $DS . "EmbedRocksResults.json";
+        $this->embedRocksFactory = file_get_contents($jsonFile);
+    }
+    /**
      * __construct should throw an error if api key is blank
      *
      * @return void
@@ -65,27 +85,18 @@ class EmbedRocksTest extends \PHPUnit_Framework_TestCase
      */
     public function testGetShouldReturnTheData()
     {
-        $expected = new \stdClass();
-        $expected->title = 'I Love Cows... On My Plate.';
-        $expected->description = 'Learn how to cook a cow.';
-        $expected->article = 'Here is the best way to cook cow...';
-        $image = new \stdClass();
-        $image->url = 'http://image.com/cow-steak.png';
-        $image->height = 500;
-        $image->width = 500;
-        $expected->images = array($image);
+        $expected = json_decode($this->embedRocksFactory);
         $curlMock = $this->getMock('\PHPToolbox\CachedRequest\CurlUtility', array('makeRequest'));
         $curlMock->expects($this->exactly(1))
                     ->method('makeRequest')
                     ->with('https://api.embed.rocks/api/?key=my-api-key&url=http%3A%2F%2Fmashable.com%2F', 'GET')
-                    ->will($this->returnValue(json_encode($expected)));
+                    ->will($this->returnValue($this->embedRocksFactory));
         $embed = new \EmbedRocks\EmbedRocks('my-api-key', $curlMock);
         $actual = $embed->get('http://mashable.com/');
         $this->assertEquals($expected->title, $actual->title);
         $this->assertEquals($expected->description, $actual->description);
         $this->assertEquals($expected->article, $actual->article);
-        $this->assertEquals($expected->images[0]->url, $actual->images[0]->url);
-        $this->assertEquals($expected->images[0]->height, $actual->images[0]->height);
-        $this->assertEquals($expected->images[0]->width, $actual->images[0]->width);
+        $this->assertEquals($expected->html, $actual->html);
+        $this->assertEquals($expected->site, $actual->site);
     }
 }
