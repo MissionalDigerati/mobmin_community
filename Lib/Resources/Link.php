@@ -1,24 +1,24 @@
 <?php
 /**
  * This file is part of #MobMin Community.
- * 
+ *
  * #MobMin Community is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Joshua Project API is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see 
+ * along with this program.  If not, see
  * <http://www.gnu.org/licenses/>.
  *
  * @author Johnathan Pulos <johnathan@missionaldigerati.org>
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
- * 
+ *
  */
 namespace Resources;
 
@@ -74,7 +74,7 @@ class Link extends Model
         'link_author', 'link_status', 'link_randkey', 'link_votes', 'link_karma', 'link_modified', 'link_date',
         'link_published_date', 'link_category', 'link_url', 'link_url_title', 'link_title', 'link_title_url',
         'link_content', 'link_summary', 'link_tags', 'social_media_id', 'social_media_account', 'link_embedly_html',
-        'link_embedly_author', 'link_embedly_author_link', 'link_embedly_thumb_url', 'link_embedly_type'
+        'link_author', 'link_embedly_type'
     );
     /**
      * A whitelist of all allowable link status
@@ -266,7 +266,7 @@ class Link extends Model
          * @link http://stackoverflow.com/a/8286096
          */
         if (strlen($newTitle) > $this->truncatedTitleLength) {
-            $newTitle = strstr(wordwrap($newTitle, $this->truncatedTitleLength), "\n", true);   
+            $newTitle = strstr(wordwrap($newTitle, $this->truncatedTitleLength), "\n", true);
         }
         return $newTitle . " ...";
     }

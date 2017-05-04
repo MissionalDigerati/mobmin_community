@@ -1,30 +1,31 @@
 <?php
 /**
  * This file is part of #MobMin Community.
- * 
+ *
  * #MobMin Community is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Joshua Project API is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see 
+ * along with this program.  If not, see
  * <http://www.gnu.org/licenses/>.
  *
  * @author Johnathan Pulos <johnathan@missionaldigerati.org>
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
- * 
+ *
  */
 /**
  * Set the default date timezone
  *
  * @author Johnathan Pulos
  */
+set_time_limit(0);
 date_default_timezone_set('America/Los_Angeles');
  /**
   * This script pulls the latests tweets
@@ -42,10 +43,6 @@ $pliggUsername = 'MobMin';
  * SET THIS TO THE CATEGORY ID THAT THESE STORIES WILL BE ATTRIBUTED TO
  */
 $pliggCategory = 1;
-/**
- * SET THIS TO THE MAXIMUM NUMBER OF LINKS THAT CAN BE SENT TO EMBEDLY
- */
-$embedlyMaxLinks = 20;
 /**
  * Load up the Aura
  *
@@ -72,17 +69,23 @@ $loader->add("Config\DatabaseSettings", $rootDirectory);
  */
 $loader->add("Config\TwitterSettings", $rootDirectory);
 /**
- * Setup the Embedly settings object
+ * Setup the Embed settings object
  *
  * @author Johnathan Pulos
  */
-$loader->add("Config\EmbedlySettings", $rootDirectory);
+$loader->add("Config\EmbedRocksSettings", $rootDirectory);
 /**
  * Autoload the PDO Database Class
  *
  * @author Johnathan Pulos
  */
 $loader->add("PHPToolbox\PDODatabase\PDODatabaseConnect", $PHPToolboxDirectory);
+/**
+ * Autoload the cURL Utility Class
+ *
+ * @author Johnathan Pulos
+ */
+$loader->add("PHPToolbox\CachedRequest\CurlUtility", $PHPToolboxDirectory);
 /**
  * Autoload the Twitter OAuth
  *
@@ -93,8 +96,8 @@ $loader->add("TwitterOAuth\Exception\TwitterException", $vendorDirectory . "rica
 /**
  * Autoload Embedly Library
  */
-$loader->add("Embedly\Embedly", $vendorDirectory . "embedly" . $DS . "embedly-php" . $DS . "src");
-$embedlySettings = new \Config\EmbedlySettings();
+$loader->add("EmbedRocks\EmbedRocks", $libDirectory);
+$embedSettings = new \Config\EmbedRocksSettings();
 /**
  * Autoload the slugify library
  */
@@ -234,7 +237,7 @@ foreach ($pgData as $tweet) {
             }
             if ($errorSaving === false) {
                 /**
-                 * If they do not have an avatar, we want to insert it.  Any avatars that already exist are probably outdated since these are older tweets. 
+                 * If they do not have an avatar, we want to insert it.  Any avatars that already exist are probably outdated since these are older tweets.
                  */
                 if ($tweetFeedAvatarResource->exists($tweeterId, 'tweeter_id') === false) {
                     /**
@@ -311,24 +314,20 @@ foreach ($pgData as $tweet) {
 /**
  * Now intialize the parser, and have it prepare all the links for the database
  */
-$embedlyAPI = new \Embedly\Embedly(array('key'   =>  $embedlySettings->APIKey));
-$embedlyLinkData = array();
-$chunks = array_chunk($allLinksToProcess, 20);
-$chunkCount = 1;
-foreach ($chunks as $chunk) {
-    echo "Processing Chunk #" . $chunkCount . "\r\n";
-    $data = $embedlyAPI->oembed(array('urls' =>  $chunk));
-    foreach ($data as $key => $linkData) {
-        $linkData->original_url = $chunk[$key];
-        array_push($embedlyLinkData, $linkData);
-    }
-    $chunkCount++;
+$embedAPI = new \EmbedRocks\EmbedRocks($embedSettings->APIKey, new \PHPToolbox\CachedRequest\CurlUtility());
+$embedLinkData = array();
+foreach ($allLinksToProcess as $link) {
+    $data = $embedAPI->get($link);
+    echo $link;
+    print_r($data);
+    $data->original_url = $link;
+    array_push($embedLinkData, $data);
 }
 /**
  * Now iterate over all the link data, merge it, and save it
  */
 foreach ($allLinkData as $linkKey => $link) {
-    foreach ($embedlyLinkData as $data) {
+    foreach ($embedLinkData as $data) {
         /**
          * We have the correct data for the link
          */
@@ -355,21 +354,6 @@ foreach ($allLinkData as $linkKey => $link) {
                 $allLinkData[$linkKey]['link_embedly_html'] = $data->html;
             } else {
                 $allLinkData[$linkKey]['link_embedly_html'] = '';
-            }
-            if ((property_exists($data, 'author_name')) && ($data->author_name != '')) {
-                $allLinkData[$linkKey]['link_embedly_author'] = $data->author_name;
-            } else {
-                $allLinkData[$linkKey]['link_embedly_author'] = '';
-            }
-            if ((property_exists($data, 'author_url')) && ($data->author_url != '')) {
-                $allLinkData[$linkKey]['link_embedly_author_link'] = $data->author_url;
-            } else {
-                $allLinkData[$linkKey]['link_embedly_author_link'] = '';
-            }
-            if ((property_exists($data, 'thumbnail_url')) && ($data->thumbnail_url != '')) {
-                $allLinkData[$linkKey]['link_embedly_thumb_url'] = $data->thumbnail_url;
-            } else {
-                $allLinkData[$linkKey]['link_embedly_thumb_url'] = '';
             }
             if ((property_exists($data, 'type')) && ($data->type != '')) {
                 $allLinkData[$linkKey]['link_embedly_type'] = $data->type;
@@ -406,9 +390,8 @@ foreach ($allLinkData as $linkKey => $link) {
 try {
     $tagCacheResource = new \Resources\TagCache($mysqlDatabase);
     $tagCacheResource->reset();
-    echo "The Tag Cache has been updated!\r\n";  
+    echo "The Tag Cache has been updated!\r\n";
 }  catch (Exception $e) {
     echo "There was a problem updating the Tag Cache!\r\n";
     echo "Error: " . $e->getMessage() . "\r\n";
 }
-

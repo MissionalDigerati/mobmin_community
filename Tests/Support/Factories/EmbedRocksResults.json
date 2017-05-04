@@ -1,0 +1,68 @@
+{
+	"url": "http://weadapt.org/knowledge-base/improving-access-to-climate-adaptation-information/mwash",
+	"site": "weadapt.org",
+	"favicon": {
+		"url": "https://www.weadapt.org/sites/weadapt.org/files/favicon_0.ico",
+		"safe": "https%3A%2F%2Fwww.weadapt.org%2Fsites%2Fweadapt.org%2Ffiles%2Ffavicon_0.ico"
+	},
+	"title": "mWASH: Mobile Phone Applications for the Water, Sanitation, and Hygiene Sector | weADAPT",
+	"description": "Hutchings, M., Dev, A., Palaniappan, M., Srinivasan, V., Ramanathan, N., Taylor, J. 2012. mWASH: Mobile Phone Applications for the Water, Sanitation, and Hygiene Sector.",
+	"article": "<div><p><span>Hutchings, M., Dev, A., Palaniappan, M., Srinivasan, V., Ramanathan, N., Taylor, J. 2012. mWASH: Mobile Phone Applications for the Water, Sanitation, and Hygiene Sector. </span></p></div>",
+	"images": [],
+	"imextra": [{
+		"url": "https://www.weadapt.org/sites/weadapt.org/themes/weadapt2015/logo.png",
+		"safe": "https%3A%2F%2Fwww.weadapt.org%2Fsites%2Fweadapt.org%2Fthemes%2Fweadapt2015%2Flogo.png"
+	}, {
+		"url": "https://www.weadapt.org/sites/weadapt.org/files/legacy-new/knowledge-base/images/53df6ed2947edscreen-shot-2014-08-04-at-12.30.03.png",
+		"safe": "https%3A%2F%2Fwww.weadapt.org%2Fsites%2Fweadapt.org%2Ffiles%2Flegacy-new%2Fknowledge-base%2Fimages%2F53df6ed2947edscreen-shot-2014-08-04-at-12.30.03.png"
+	}, {
+		"url": "https://www.weadapt.org/sites/weadapt.org/files/styles/thumbnail/public/53df691bc601b53c93edc6b35dccr.png?itok=Dep-7bop",
+		"safe": "https%3A%2F%2Fwww.weadapt.org%2Fsites%2Fweadapt.org%2Ffiles%2Fstyles%2Fthumbnail%2Fpublic%2F53df691bc601b53c93edc6b35dccr.png%3Fitok%3DDep-7bop"
+	}, {
+		"url": "https://www.weadapt.org/sites/weadapt.org/files/styles/logo/public/53df7576be4aenextleaf-logo_0.jpg?itok=PgP9UP76",
+		"safe": "https%3A%2F%2Fwww.weadapt.org%2Fsites%2Fweadapt.org%2Ffiles%2Fstyles%2Flogo%2Fpublic%2F53df7576be4aenextleaf-logo_0.jpg%3Fitok%3DPgP9UP76"
+	}, {
+		"url": "https://www.weadapt.org/sites/weadapt.org/files/styles/logo/public/53df78f4de84dphoto_0.jpg?itok=6YsvgnnC",
+		"safe": "https%3A%2F%2Fwww.weadapt.org%2Fsites%2Fweadapt.org%2Ffiles%2Fstyles%2Flogo%2Fpublic%2F53df78f4de84dphoto_0.jpg%3Fitok%3D6YsvgnnC"
+	}, {
+		"url": "https://www.weadapt.org/sites/weadapt.org/files/styles/logo/public/502a679714abfusaid_0.png?itok=eIzsuSmc",
+		"safe": "https%3A%2F%2Fwww.weadapt.org%2Fsites%2Fweadapt.org%2Ffiles%2Fstyles%2Flogo%2Fpublic%2F502a679714abfusaid_0.png%3Fitok%3DeIzsuSmc"
+	}, {
+		"url": "https://www.weadapt.org/sites/weadapt.org/files/styles/logo/public/53df73c740a25pacific-institute_0.png?itok=hrqT4PRR",
+		"safe": "https%3A%2F%2Fwww.weadapt.org%2Fsites%2Fweadapt.org%2Ffiles%2Fstyles%2Flogo%2Fpublic%2F53df73c740a25pacific-institute_0.png%3Fitok%3DhrqT4PRR"
+	}, {
+		"url": "https://www.weadapt.org/sites/weadapt.org/files/styles/thumbnail/public/default_images/default-user-weadapt_360.png?itok=cVfNTKFd",
+		"safe": "https%3A%2F%2Fwww.weadapt.org%2Fsites%2Fweadapt.org%2Ffiles%2Fstyles%2Fthumbnail%2Fpublic%2Fdefault_images%2Fdefault-user-weadapt_360.png%3Fitok%3DcVfNTKFd"
+	}, {
+		"url": "https://www.weadapt.org/sites/weadapt.org/files/styles/thumbnail/public/christian-ledwell.jpg?itok=24iwvYFQ",
+		"safe": "https%3A%2F%2Fwww.weadapt.org%2Fsites%2Fweadapt.org%2Ffiles%2Fstyles%2Fthumbnail%2Fpublic%2Fchristian-ledwell.jpg%3Fitok%3D24iwvYFQ"
+	}, {
+		"url": "https://www.weadapt.org/sites/weadapt.org/files/styles/thumbnail/public/12783733_10153807670366154_4667704244470762045_o.jpg?itok=KOqjtI1l",
+		"safe": "https%3A%2F%2Fwww.weadapt.org%2Fsites%2Fweadapt.org%2Ffiles%2Fstyles%2Fthumbnail%2Fpublic%2F12783733_10153807670366154_4667704244470762045_o.jpg%3Fitok%3DKOqjtI1l"
+	}, {
+		"url": "https://www.weadapt.org/sites/weadapt.org/files/styles/thumbnail/public/kenyan_farmer_.jpg?itok=dYMzvn6Z",
+		"safe": "https%3A%2F%2Fwww.weadapt.org%2Fsites%2Fweadapt.org%2Ffiles%2Fstyles%2Fthumbnail%2Fpublic%2Fkenyan_farmer_.jpg%3Fitok%3DdYMzvn6Z"
+	}, {
+		"url": "https://www.weadapt.org/sites/weadapt.org/files/styles/thumbnail/public/weadapt_content_distribution_2_0.png?itok=HVLWnilB",
+		"safe": "https%3A%2F%2Fwww.weadapt.org%2Fsites%2Fweadapt.org%2Ffiles%2Fstyles%2Fthumbnail%2Fpublic%2Fweadapt_content_distribution_2_0.png%3Fitok%3DHVLWnilB"
+	}, {
+		"url": "https://www.weadapt.org/sites/weadapt.org/files/styles/thumbnail/public/5534fbb84b0a1sk-rmavbild-2015-04-20-kl.-14.19.54.png?itok=O4dJ6_Q3",
+		"safe": "https%3A%2F%2Fwww.weadapt.org%2Fsites%2Fweadapt.org%2Ffiles%2Fstyles%2Fthumbnail%2Fpublic%2F5534fbb84b0a1sk-rmavbild-2015-04-20-kl.-14.19.54.png%3Fitok%3DO4dJ6_Q3"
+	}, {
+		"url": "https://www.weadapt.org/sites/weadapt.org/files/styles/thumbnail/public/55045c6ad9ef32.png?itok=QQnmfflG",
+		"safe": "https%3A%2F%2Fwww.weadapt.org%2Fsites%2Fweadapt.org%2Ffiles%2Fstyles%2Fthumbnail%2Fpublic%2F55045c6ad9ef32.png%3Fitok%3DQQnmfflG"
+	}, {
+		"url": "https://www.weadapt.org/sites/weadapt.org/files/styles/thumbnail/public/54fd4aab931551tp-6438.jpg?itok=uyyA6EpE",
+		"safe": "https%3A%2F%2Fwww.weadapt.org%2Fsites%2Fweadapt.org%2Ffiles%2Fstyles%2Fthumbnail%2Fpublic%2F54fd4aab931551tp-6438.jpg%3Fitok%3DuyyA6EpE"
+	}, {
+		"url": "https://www.weadapt.org/sites/weadapt.org/files/styles/thumbnail/public/55002e040885cscreen-shot-2015-03-11-at-11.58.40-copy.png?itok=qR_qyVg1",
+		"safe": "https%3A%2F%2Fwww.weadapt.org%2Fsites%2Fweadapt.org%2Ffiles%2Fstyles%2Fthumbnail%2Fpublic%2F55002e040885cscreen-shot-2015-03-11-at-11.58.40-copy.png%3Fitok%3DqR_qyVg1"
+	}, {
+		"url": "/sites/dev.weadapt.org/files/logo-sei-l.png",
+		"safe": ""
+	}],
+	"videos": [],
+	"audios": [],
+	"type": "rich",
+	"html": "<div class=\"card\">\n    <a target=\"_blank\" href=\"http://weadapt.org/knowledge-base/improving-access-to-climate-adaptation-information/mwash\">\n      \n    <div class=\"card-text\">\n      <h3>mWASH: Mobile Phone Applications for the Water, Sanitation, and Hygiene Sector | weADAPT</h3>\n      <p>Hutchings, M., Dev, A., Palaniappan, M., Srinivasan, V., Ramanathan, N., Taylor, J. 2012. mWASH: Mobile Phone Applications for the Water, Sanitation, and Hygiene Sector.</p>\n      \n        <p class=\"fav\">\n          <img onerror=\"this.style.display='none'\" class=\"favicon\" src=\"https://www.weadapt.org/sites/weadapt.org/files/favicon_0.ico\">\n          weadapt.org\n        </p>\n    </div>\n  \n    </a>\n  </div>"
+}
