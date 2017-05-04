@@ -25,6 +25,7 @@
  *
  * @author Johnathan Pulos
  */
+set_time_limit(0);
 date_default_timezone_set('America/Los_Angeles');
  /**
   * This script pulls the latests tweets
@@ -42,10 +43,6 @@ $pliggUsername = 'MobMin';
  * SET THIS TO THE CATEGORY ID THAT THESE STORIES WILL BE ATTRIBUTED TO
  */
 $pliggCategory = 1;
-/**
- * SET THIS TO THE MAXIMUM NUMBER OF LINKS THAT CAN BE SENT TO EMBEDLY
- */
-$embedlyMaxLinks = 20;
 /**
  * Load up the Aura
  *
