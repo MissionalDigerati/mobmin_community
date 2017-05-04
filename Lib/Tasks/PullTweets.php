@@ -236,41 +236,40 @@ foreach ($response->statuses as $key => $tweet) {
         }
     }
 }
-print_r($filteredResponse);
 /**
  * Now intialize the parser, and have it prepare all the links for the database
  */
-$embedAPI = new \EmbedRocks\EmbedRocks($embedSettings->APIKey, new /PHPToolbox/CachedRequest/CurlUtility());
-// $parser = new \Parsers\Tweets($embedlyAPI, $slugify);
-// $defaults =  array(
-//     'link_author'   =>  $pliggUserData[0]['user_id'],
-//     'link_status'   =>  'published',
-//     'link_randkey'  =>  0,
-//     'link_votes'    =>  0,
-//     'link_karma'    =>  0,
-//     'link_modified' =>  '',
-//     'link_category' =>  $pliggCategory
-// );
-// $parser->setDefaultLinkValues($defaults);
-// $links = $parser->parseLinksFromAPI($filteredResponse);
-// foreach ($links as $link) {
-//     if ($linkResource->exists($link['link_url'], 'link_url') === false) {
-//         if ($link['link_embedly_type'] == 'error') {
-//             echo "This link " . $link['link_url'] . " returned an error.\r\n";
-//         } else {
-//             /**
-//              * Now save the link and break out of this loop
-//              */
-//             try {
-//                 $linkResource->save($link);
-//                 echo "Inserted the link '" . $link['link_url'] . "' titled '" . $link['link_title'] . "'\r\n";
-//             } catch (Exception $e) {
-//                 echo "There was a problem inserting the link '" . $link['link_url'] . "' titled '" . $link['link_title'] . "'\r\n";
-//                 echo "Error: " . $e->getMessage() . "\r\n";
-//             }
-//         }
-//     }
-// }
+$embedAPI = new \EmbedRocks\EmbedRocks($embedSettings->APIKey, new \PHPToolbox\CachedRequest\CurlUtility());
+$parser = new \Parsers\Tweets($embedAPI, $slugify);
+$defaults =  array(
+    'link_author'   =>  $pliggUserData[0]['user_id'],
+    'link_status'   =>  'published',
+    'link_randkey'  =>  0,
+    'link_votes'    =>  0,
+    'link_karma'    =>  0,
+    'link_modified' =>  '',
+    'link_category' =>  $pliggCategory
+);
+$parser->setDefaultLinkValues($defaults);
+$links = $parser->parseLinksFromAPI($filteredResponse);
+foreach ($links as $link) {
+    if ($linkResource->exists($link['link_url'], 'link_url') === false) {
+        if ($link['link_embedly_type'] == 'error') {
+            echo "This link " . $link['link_url'] . " returned an error.\r\n";
+        } else {
+            /**
+             * Now save the link and break out of this loop
+             */
+            try {
+                $linkResource->save($link);
+                echo "Inserted the link '" . $link['link_url'] . "' titled '" . $link['link_title'] . "'\r\n";
+            } catch (Exception $e) {
+                echo "There was a problem inserting the link '" . $link['link_url'] . "' titled '" . $link['link_title'] . "'\r\n";
+                echo "Error: " . $e->getMessage() . "\r\n";
+            }
+        }
+    }
+}
 /**
  * Update the Tag Cache
  *
