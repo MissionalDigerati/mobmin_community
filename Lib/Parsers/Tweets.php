@@ -222,21 +222,6 @@ class Tweets
                     } else {
                         $this->tweetedLinks[$linkKey]['link_embedly_html'] = '';
                     }
-                    if ((property_exists($data, 'author_name')) && ($data->author_name != '')) {
-                        $this->tweetedLinks[$linkKey]['link_embedly_author'] = $data->author_name;
-                    } else {
-                        $this->tweetedLinks[$linkKey]['link_embedly_author'] = '';
-                    }
-                    if ((property_exists($data, 'author_url')) && ($data->author_url != '')) {
-                        $this->tweetedLinks[$linkKey]['link_embedly_author_link'] = $data->author_url;
-                    } else {
-                        $this->tweetedLinks[$linkKey]['link_embedly_author_link'] = '';
-                    }
-                    if ((property_exists($data, 'thumbnail_url')) && ($data->thumbnail_url != '')) {
-                        $this->tweetedLinks[$linkKey]['link_embedly_thumb_url'] = $data->thumbnail_url;
-                    } else {
-                        $this->tweetedLinks[$linkKey]['link_embedly_thumb_url'] = '';
-                    }
                     if ((property_exists($data, 'type')) && ($data->type != '')) {
                         $this->tweetedLinks[$linkKey]['link_embedly_type'] = $data->type;
                     } else {

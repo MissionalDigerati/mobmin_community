@@ -44,6 +44,13 @@ class TweetsTest extends \PHPUnit_Framework_TestCase
      **/
     private $searchTweetsSingleTweetFactory;
     /**
+     * A JSON Object that represents the response of Embed Rocks
+     *
+     * @var Object
+     * @access private
+     **/
+    private $embedRocksFactory;
+    /**
      * Setup the testing
      *
      * @return void
@@ -57,6 +64,8 @@ class TweetsTest extends \PHPUnit_Framework_TestCase
         $this->searchTweetsFactory = json_decode(file_get_contents($jsonFile));
         $jsonFile = __DIR__ . $DS . ".." . $DS . ".." . $DS . ".." . $DS . "Support" . $DS . "Factories" . $DS . "SearchTweetsSingleTweet.json";
         $this->searchTweetsSingleTweetFactory = json_decode(file_get_contents($jsonFile));
+        $jsonFile = __DIR__ . $DS . ".." . $DS . ".." . $DS . ".." . $DS . "Support" . $DS . "Factories" . $DS . "EmbedRocksResults.json";
+        $this->embedRocksFactory = json_decode(file_get_contents($jsonFile));
     }
     /**
      * __construct should throw an error if passed a non \Embedly\Embedly object for embedly
@@ -191,20 +200,17 @@ class TweetsTest extends \PHPUnit_Framework_TestCase
      * @access public
      * @author Johnathan Pulos
      **/
-    public function testParseLinksFromAPIShouldSetLinkTitleBasedOnEmbedlyData()
+    public function testParseLinksFromAPIShouldSetLinkTitleBasedOnEmbedData()
     {
-        $expectedTitle = 'An Unexpectant Place';
-        $returnedObject = new \stdClass();
-        $returnedObject->title = $expectedTitle;
         $embedObj = $this->getMockBuilder('\EmbedRocks\EmbedRocks')->disableOriginalConstructor()->getMock();
         $embedObj->expects($this->exactly(1))
                     ->method('get')
                     ->with('http://weadapt.org/knowledge-base/improving-access-to-climate-adaptation-information/mwash')
-                    ->will($this->returnValue($returnedObject));
+                    ->will($this->returnValue($this->embedRocksFactory));
         $tweetsParser = $this->setupTweetsParser($embedObj);
         $linkData = $tweetsParser->parseLinksFromAPI($this->searchTweetsSingleTweetFactory);
         $this->assertFalse(empty($linkData));
-        $this->assertEquals($expectedTitle, $linkData[0]['link_title']);
+        $this->assertEquals('mWASH: Mobile Phone Applications for the Water, Sanitation, and Hygiene Sector | weADAPT', $linkData[0]['link_title']);
     }
     /**
      * parseLinksFromAPI() should set the link_title to a default if the Embed returned data does not set it, and set the link_status to new
@@ -217,13 +223,13 @@ class TweetsTest extends \PHPUnit_Framework_TestCase
     {
         $expectedTitle = 'No Title Available';
         $expectedStatus = 'new';
-        $returnedObject = new \stdClass();
-        $returnedObject->description = 'My Special Description';
+        $returnedData = $this->embedRocksFactory;
+        $returnedData->title = '';
         $embedObj = $this->getMockBuilder('\EmbedRocks\EmbedRocks')->disableOriginalConstructor()->getMock();
         $embedObj->expects($this->exactly(1))
                     ->method('get')
                     ->with('http://weadapt.org/knowledge-base/improving-access-to-climate-adaptation-information/mwash')
-                    ->will($this->returnValue($returnedObject));
+                    ->will($this->returnValue($returnedData));
         $tweetsParser = $this->setupTweetsParser($embedObj);
         $linkData = $tweetsParser->parseLinksFromAPI($this->searchTweetsSingleTweetFactory);
         $this->assertFalse(empty($linkData));
@@ -237,10 +243,10 @@ class TweetsTest extends \PHPUnit_Framework_TestCase
      * @access public
      * @author Johnathan Pulos
      **/
-    public function testParseLinksFromAPIShouldSetLinkTitleURLBasedOnEmbedlyData()
+    public function testParseLinksFromAPIShouldSetLinkTitleURLBasedOnEmbedData()
     {
         $expectedURL = 'an-unexpectant-place';
-        $returnedObject = new \stdClass();
+        $returnedObject = $this->embedRocksFactory;
         $returnedObject->title = 'An Unexpectant Place';
         $embedObj = $this->getMockBuilder('\EmbedRocks\EmbedRocks')->disableOriginalConstructor()->getMock();
         $embedObj->expects($this->exactly(1))
@@ -258,38 +264,16 @@ class TweetsTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($expectedURL, $linkData[0]['link_title_url']);
     }
     /**
-     * parseLinksFromAPI() should generate a UUID for the link_title_url if title is missing from Embedly
-     *
-     * @return void
-     * @access public
-     * @author Johnathan Pulos
-     **/
-    public function testParseLinksFromAPIShouldSetLinkTitleURLToAUUIDIfTitleIsUnavailableFromEmbedly()
-    {
-        $returnedObject = new \stdClass();
-        $embedObj = $this->getMockBuilder('\EmbedRocks\EmbedRocks')->disableOriginalConstructor()->getMock();
-        $embedObj->expects($this->exactly(1))
-                    ->method('get')
-                    ->with('http://weadapt.org/knowledge-base/improving-access-to-climate-adaptation-information/mwash')
-                    ->will($this->returnValue($returnedObject));
-        $slugifyObj = $this->getMock('\Cocur\Slugify\Slugify', array('slugify'));
-        $slugifyObj->expects($this->exactly(0))->method('slugify');
-        $tweetsParser = $this->setupTweetsParser($embedObj, $slugifyObj);
-        $linkData = $tweetsParser->parseLinksFromAPI($this->searchTweetsSingleTweetFactory);
-        $this->assertFalse(empty($linkData));
-        $this->assertNotEquals('', $linkData[0]['link_title_url']);
-    }
-    /**
      * parseLinksFromAPI() should set the link_summary and link_content to the description provided by Embedly
      *
      * @return void
      * @access public
      * @author Johnathan Pulos
      **/
-    public function testParseLinksFromAPIShouldSetTheLinkContentAndSummaryToEmbedlysDescription()
+    public function testParseLinksFromAPIShouldSetTheLinkContentAndSummaryToEmbedlDescription()
     {
         $expectedContent = "I am a link for super heroes!!!";
-        $returnedObject = new \stdClass();
+        $returnedObject = $this->embedRocksFactory;
         $returnedObject->description = $expectedContent;
         $embedObj = $this->getMockBuilder('\EmbedRocks\EmbedRocks')->disableOriginalConstructor()->getMock();
         $embedObj->expects($this->exactly(1))
@@ -309,12 +293,13 @@ class TweetsTest extends \PHPUnit_Framework_TestCase
      * @access public
      * @author Johnathan Pulos
      **/
-    public function testParseLinksFromAPIShouldSetTheLinkContentAndSummaryToADefaultIfNoEmbedlyDescription()
+    public function testParseLinksFromAPIShouldSetTheLinkContentAndSummaryToADefaultIfNoEmbedDescription()
     {
         $expectedContent = "No description available.";
         $expectedStatus = 'new';
-        $returnedObject = new \stdClass();
+        $returnedObject = $this->embedRocksFactory;
         $returnedObject->title = 'My Special Title';
+        $returnedObject->description = '';
         $embedObj = $this->getMockBuilder('\EmbedRocks\EmbedRocks')->disableOriginalConstructor()->getMock();
         $embedObj->expects($this->exactly(1))
                     ->method('get')
@@ -334,10 +319,10 @@ class TweetsTest extends \PHPUnit_Framework_TestCase
      * @access public
      * @author Johnathan Pulos
      **/
-    public function testParseLinksFromAPIShouldSetTheLinkHTMLToEmbedlysHTML()
+    public function testParseLinksFromAPIShouldSetTheLinkHTMLToEmbedsHTML()
     {
         $expectedContent = "<p>I am a link for <strong>super heroes</strong>!!!</p>";
-        $returnedObject = new \stdClass();
+        $returnedObject = $this->embedRocksFactory;
         $returnedObject->html = $expectedContent;
         $embedObj = $this->getMockBuilder('\EmbedRocks\EmbedRocks')->disableOriginalConstructor()->getMock();
         $embedObj->expects($this->exactly(1))
@@ -356,10 +341,11 @@ class TweetsTest extends \PHPUnit_Framework_TestCase
      * @access public
      * @author Johnathan Pulos
      **/
-    public function testParseLinksFromAPIShouldSetTheLinkHTMLToEmptyIfNoEmbedlysHTML()
+    public function testParseLinksFromAPIShouldSetTheLinkHTMLToEmptIfNoEmbedlysHTML()
     {
         $expectedContent = "";
-        $returnedObject = new \stdClass();
+        $returnedObject = $this->embedRocksFactory;
+        $returnedObject->html = '';
         $embedObj = $this->getMockBuilder('\EmbedRocks\EmbedRocks')->disableOriginalConstructor()->getMock();
         $embedObj->expects($this->exactly(1))
                     ->method('get')
@@ -371,135 +357,6 @@ class TweetsTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($expectedContent, $linkData[0]['link_embedly_html']);
     }
     /**
-     * parseLinksFromAPI() should set the link_embedly_author to the author provided by Embedly
-     *
-     * @return void
-     * @access public
-     * @author Johnathan Pulos
-     **/
-    public function testParseLinksFromAPIShouldSetTheLinkAuthorToEmbedlysAuthor()
-    {
-        $expectedContent = "Jimmy Simpson Smith";
-        $returnedObject = new \stdClass();
-        $returnedObject->author_name = $expectedContent;
-        $embedObj = $this->getMockBuilder('\EmbedRocks\EmbedRocks')->disableOriginalConstructor()->getMock();
-        $embedObj->expects($this->exactly(1))
-                    ->method('get')
-                    ->with('http://weadapt.org/knowledge-base/improving-access-to-climate-adaptation-information/mwash')
-                    ->will($this->returnValue($returnedObject));
-        $tweetsParser = $this->setupTweetsParser($embedObj);
-        $linkData = $tweetsParser->parseLinksFromAPI($this->searchTweetsSingleTweetFactory);
-        $this->assertFalse(empty($linkData));
-        $this->assertEquals($expectedContent, $linkData[0]['link_embedly_author']);
-    }
-    /**
-     * parseLinksFromAPI() should set the link_embedly_author to an empty string if no author provided by Embedly
-     *
-     * @return void
-     * @access public
-     * @author Johnathan Pulos
-     **/
-    public function testParseLinksFromAPIShouldSetTheLinkAuthorToEmptyIfNoEmbedlysAuthor()
-    {
-        $expectedContent = "";
-        $returnedObject = new \stdClass();
-        $embedObj = $this->getMockBuilder('\EmbedRocks\EmbedRocks')->disableOriginalConstructor()->getMock();
-        $embedObj->expects($this->exactly(1))
-                    ->method('get')
-                    ->with('http://weadapt.org/knowledge-base/improving-access-to-climate-adaptation-information/mwash')
-                    ->will($this->returnValue($returnedObject));
-        $tweetsParser = $this->setupTweetsParser($embedObj);
-        $linkData = $tweetsParser->parseLinksFromAPI($this->searchTweetsSingleTweetFactory);
-        $this->assertFalse(empty($linkData));
-        $this->assertEquals($expectedContent, $linkData[0]['link_embedly_author']);
-    }
-    /**
-     * parseLinksFromAPI() should set the link_embedly_author_link to the author_url provided by Embedly
-     *
-     * @return void
-     * @access public
-     * @author Johnathan Pulos
-     **/
-    public function testParseLinksFromAPIShouldSetTheLinkAuthorLinkToEmbedlysAuthorURL()
-    {
-        $expectedContent = "http://www.mypage.com";
-        $returnedObject = new \stdClass();
-        $returnedObject->author_url = $expectedContent;
-        $embedObj = $this->getMockBuilder('\EmbedRocks\EmbedRocks')->disableOriginalConstructor()->getMock();
-        $embedObj->expects($this->exactly(1))
-                    ->method('get')
-                    ->with('http://weadapt.org/knowledge-base/improving-access-to-climate-adaptation-information/mwash')
-                    ->will($this->returnValue($returnedObject));
-        $tweetsParser = $this->setupTweetsParser($embedObj);
-        $linkData = $tweetsParser->parseLinksFromAPI($this->searchTweetsSingleTweetFactory);
-        $this->assertFalse(empty($linkData));
-        $this->assertEquals($expectedContent, $linkData[0]['link_embedly_author_link']);
-    }
-    /**
-     * parseLinksFromAPI() should set the link_embedly_author_link to an empty string if no author_url provided by Embedly
-     *
-     * @return void
-     * @access public
-     * @author Johnathan Pulos
-     **/
-    public function testParseLinksFromAPIShouldSetTheLinkAuthorLinkToEmptyIfNoEmbedlysAuthorURL()
-    {
-        $expectedContent = "";
-        $returnedObject = new \stdClass();
-        $embedObj = $this->getMockBuilder('\EmbedRocks\EmbedRocks')->disableOriginalConstructor()->getMock();
-        $embedObj->expects($this->exactly(1))
-                    ->method('get')
-                    ->with('http://weadapt.org/knowledge-base/improving-access-to-climate-adaptation-information/mwash')
-                    ->will($this->returnValue($returnedObject));
-        $tweetsParser = $this->setupTweetsParser($embedObj);
-        $linkData = $tweetsParser->parseLinksFromAPI($this->searchTweetsSingleTweetFactory);
-        $this->assertFalse(empty($linkData));
-        $this->assertEquals($expectedContent, $linkData[0]['link_embedly_author_link']);
-    }
-    /**
-     * parseLinksFromAPI() should set the link_embedly_thumb_url to the thumbnail_url provided by Embedly
-     *
-     * @return void
-     * @access public
-     * @author Johnathan Pulos
-     **/
-    public function testParseLinksFromAPIShouldSetTheLinkThumbnailURLToEmbedlysThumbnailURL()
-    {
-        $expectedContent = "http://www.mypage.com/images/my_face.png";
-        $returnedObject = new \stdClass();
-        $returnedObject->thumbnail_url = $expectedContent;
-        $embedObj = $this->getMockBuilder('\EmbedRocks\EmbedRocks')->disableOriginalConstructor()->getMock();
-        $embedObj->expects($this->exactly(1))
-                    ->method('get')
-                    ->with('http://weadapt.org/knowledge-base/improving-access-to-climate-adaptation-information/mwash')
-                    ->will($this->returnValue($returnedObject));
-        $tweetsParser = $this->setupTweetsParser($embedObj);
-        $linkData = $tweetsParser->parseLinksFromAPI($this->searchTweetsSingleTweetFactory);
-        $this->assertFalse(empty($linkData));
-        $this->assertEquals($expectedContent, $linkData[0]['link_embedly_thumb_url']);
-    }
-    /**
-     * parseLinksFromAPI() should set the link_embedly_thumb_url to empty string if no thumbnail_url provided by Embedly
-     *
-     * @return void
-     * @access public
-     * @author Johnathan Pulos
-     **/
-    public function testParseLinksFromAPIShouldSetTheLinkThumbnailURLToEmptyIfNoEmbedlysThumbnailURL()
-    {
-        $expectedContent = "";
-        $returnedObject = new \stdClass();
-        $embedObj = $this->getMockBuilder('\EmbedRocks\EmbedRocks')->disableOriginalConstructor()->getMock();
-        $embedObj->expects($this->exactly(1))
-                    ->method('get')
-                    ->with('http://weadapt.org/knowledge-base/improving-access-to-climate-adaptation-information/mwash')
-                    ->will($this->returnValue($returnedObject));
-        $tweetsParser = $this->setupTweetsParser($embedObj);
-        $linkData = $tweetsParser->parseLinksFromAPI($this->searchTweetsSingleTweetFactory);
-        $this->assertFalse(empty($linkData));
-        $this->assertEquals($expectedContent, $linkData[0]['link_embedly_thumb_url']);
-    }
-    /**
      * parseLinksFromAPI() should set the link_embedly_type to the type provided by Embedly
      *
      * @return void
@@ -509,7 +366,7 @@ class TweetsTest extends \PHPUnit_Framework_TestCase
     public function testParseLinksFromAPIShouldSetTheLinkTypeToEmbedlysType()
     {
         $expectedContent = "video";
-        $returnedObject = new \stdClass();
+        $returnedObject = $this->embedRocksFactory;
         $returnedObject->type = $expectedContent;
         $embedObj = $this->getMockBuilder('\EmbedRocks\EmbedRocks')->disableOriginalConstructor()->getMock();
         $embedObj->expects($this->exactly(1))
@@ -533,17 +390,8 @@ class TweetsTest extends \PHPUnit_Framework_TestCase
     protected function setupTweetsParser($embedObj = null, $slugifyObj = null)
     {
         if (is_null($embedObj)) {
-            $returned = new \stdClass();
-            $returned->title = 'I Love Cows... On My Plate.';
-            $returned->description = 'Learn how to cook a cow.';
-            $returned->article = 'Here is the best way to cook cow...';
-            $image = new \stdClass();
-            $image->url = 'http://image.com/cow-steak.png';
-            $image->height = 500;
-            $image->width = 500;
-            $returned->images = array($image);
             $embedObj = $this->getMockBuilder('\EmbedRocks\EmbedRocks')->disableOriginalConstructor()->getMock();
-            $embedObj->method('get')->will($this->returnValue($returned));
+            $embedObj->method('get')->will($this->returnValue($this->embedRocksFactory));
         }
         if (is_null($slugifyObj)) {
             $slugifyObj = $this->getMock('\Cocur\Slugify\Slugify', array('slugify'));

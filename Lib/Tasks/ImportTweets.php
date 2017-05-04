@@ -1,24 +1,24 @@
 <?php
 /**
  * This file is part of #MobMin Community.
- * 
+ *
  * #MobMin Community is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Joshua Project API is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see 
+ * along with this program.  If not, see
  * <http://www.gnu.org/licenses/>.
  *
  * @author Johnathan Pulos <johnathan@missionaldigerati.org>
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
- * 
+ *
  */
 /**
  * Set the default date timezone
@@ -234,7 +234,7 @@ foreach ($pgData as $tweet) {
             }
             if ($errorSaving === false) {
                 /**
-                 * If they do not have an avatar, we want to insert it.  Any avatars that already exist are probably outdated since these are older tweets. 
+                 * If they do not have an avatar, we want to insert it.  Any avatars that already exist are probably outdated since these are older tweets.
                  */
                 if ($tweetFeedAvatarResource->exists($tweeterId, 'tweeter_id') === false) {
                     /**
@@ -356,21 +356,6 @@ foreach ($allLinkData as $linkKey => $link) {
             } else {
                 $allLinkData[$linkKey]['link_embedly_html'] = '';
             }
-            if ((property_exists($data, 'author_name')) && ($data->author_name != '')) {
-                $allLinkData[$linkKey]['link_embedly_author'] = $data->author_name;
-            } else {
-                $allLinkData[$linkKey]['link_embedly_author'] = '';
-            }
-            if ((property_exists($data, 'author_url')) && ($data->author_url != '')) {
-                $allLinkData[$linkKey]['link_embedly_author_link'] = $data->author_url;
-            } else {
-                $allLinkData[$linkKey]['link_embedly_author_link'] = '';
-            }
-            if ((property_exists($data, 'thumbnail_url')) && ($data->thumbnail_url != '')) {
-                $allLinkData[$linkKey]['link_embedly_thumb_url'] = $data->thumbnail_url;
-            } else {
-                $allLinkData[$linkKey]['link_embedly_thumb_url'] = '';
-            }
             if ((property_exists($data, 'type')) && ($data->type != '')) {
                 $allLinkData[$linkKey]['link_embedly_type'] = $data->type;
             } else {
@@ -406,9 +391,8 @@ foreach ($allLinkData as $linkKey => $link) {
 try {
     $tagCacheResource = new \Resources\TagCache($mysqlDatabase);
     $tagCacheResource->reset();
-    echo "The Tag Cache has been updated!\r\n";  
+    echo "The Tag Cache has been updated!\r\n";
 }  catch (Exception $e) {
     echo "There was a problem updating the Tag Cache!\r\n";
     echo "Error: " . $e->getMessage() . "\r\n";
 }
-
