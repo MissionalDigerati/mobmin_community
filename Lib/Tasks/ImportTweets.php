@@ -72,17 +72,23 @@ $loader->add("Config\DatabaseSettings", $rootDirectory);
  */
 $loader->add("Config\TwitterSettings", $rootDirectory);
 /**
- * Setup the Embedly settings object
+ * Setup the Embed settings object
  *
  * @author Johnathan Pulos
  */
-$loader->add("Config\EmbedlySettings", $rootDirectory);
+$loader->add("Config\EmbedRocksSettings", $rootDirectory);
 /**
  * Autoload the PDO Database Class
  *
  * @author Johnathan Pulos
  */
 $loader->add("PHPToolbox\PDODatabase\PDODatabaseConnect", $PHPToolboxDirectory);
+/**
+ * Autoload the cURL Utility Class
+ *
+ * @author Johnathan Pulos
+ */
+$loader->add("PHPToolbox\CachedRequest\CurlUtility", $PHPToolboxDirectory);
 /**
  * Autoload the Twitter OAuth
  *
@@ -93,8 +99,8 @@ $loader->add("TwitterOAuth\Exception\TwitterException", $vendorDirectory . "rica
 /**
  * Autoload Embedly Library
  */
-$loader->add("Embedly\Embedly", $vendorDirectory . "embedly" . $DS . "embedly-php" . $DS . "src");
-$embedlySettings = new \Config\EmbedlySettings();
+$loader->add("EmbedRocks\EmbedRocks", $libDirectory);
+$embedSettings = new \Config\EmbedRocksSettings();
 /**
  * Autoload the slugify library
  */
@@ -311,24 +317,20 @@ foreach ($pgData as $tweet) {
 /**
  * Now intialize the parser, and have it prepare all the links for the database
  */
-$embedlyAPI = new \Embedly\Embedly(array('key'   =>  $embedlySettings->APIKey));
-$embedlyLinkData = array();
-$chunks = array_chunk($allLinksToProcess, 20);
-$chunkCount = 1;
-foreach ($chunks as $chunk) {
-    echo "Processing Chunk #" . $chunkCount . "\r\n";
-    $data = $embedlyAPI->oembed(array('urls' =>  $chunk));
-    foreach ($data as $key => $linkData) {
-        $linkData->original_url = $chunk[$key];
-        array_push($embedlyLinkData, $linkData);
-    }
-    $chunkCount++;
+$embedAPI = new \EmbedRocks\EmbedRocks($embedSettings->APIKey, new \PHPToolbox\CachedRequest\CurlUtility());
+$embedLinkData = array();
+foreach ($allLinksToProcess as $link) {
+    $data = $embedAPI->get($link);
+    echo $link;
+    print_r($data);
+    $data->original_url = $link;
+    array_push($embedLinkData, $data);
 }
 /**
  * Now iterate over all the link data, merge it, and save it
  */
 foreach ($allLinkData as $linkKey => $link) {
-    foreach ($embedlyLinkData as $data) {
+    foreach ($embedLinkData as $data) {
         /**
          * We have the correct data for the link
          */
