@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "1f5430e533acc159a321e0edc9544db7",
-    "content-hash": "82e0ec5088198fd746a730a762e6d5fc",
+    "hash": "9320adfe97d26fb6dcab94123d95292d",
+    "content-hash": "e5fc03d2e508522424dcafaf12b8d6b7",
     "packages": [
         {
             "name": "aura/autoload",
@@ -171,51 +171,6 @@
                 "slugify"
             ],
             "time": "2015-09-29 18:26:32"
-        },
-        {
-            "name": "embedly/embedly-php",
-            "version": "dev-master",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/embedly/embedly-php.git",
-                "reference": "a2cbf6dc45c1a8d82063ef099216f74007c8ad1a"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/embedly/embedly-php/zipball/a2cbf6dc45c1a8d82063ef099216f74007c8ad1a",
-                "reference": "a2cbf6dc45c1a8d82063ef099216f74007c8ad1a",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=5.3.0"
-            },
-            "require-dev": {
-                "behat/behat": "2.4.*@stable",
-                "phpunit/phpunit": "3.7.*"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-0": {
-                    "Embedly": "src"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Bob Corsaro",
-                    "email": "rcorsaro@gmail.com",
-                    "homepage": "http://bit.ly/rcorsaro"
-                }
-            ],
-            "description": "Embedly library for PHP",
-            "homepage": "https://github.com/embedly",
-            "keywords": [
-                "embedly"
-            ],
-            "time": "2015-02-05 15:06:38"
         },
         {
             "name": "ricardoper/twitteroauth",
@@ -1219,7 +1174,6 @@
     "aliases": [],
     "minimum-stability": "stable",
     "stability-flags": {
-        "embedly/embedly-php": 20,
         "cocur/slugify": 0
     },
     "prefer-stable": false,

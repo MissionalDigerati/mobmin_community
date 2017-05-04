@@ -1,24 +1,24 @@
 <?php
 /**
  * This file is part of #MobMin Community.
- * 
+ *
  * #MobMin Community is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Joshua Project API is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see 
+ * along with this program.  If not, see
  * <http://www.gnu.org/licenses/>.
  *
  * @author Johnathan Pulos <johnathan@missionaldigerati.org>
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
- * 
+ *
  */
 namespace Parsers;
 
@@ -28,12 +28,12 @@ namespace Parsers;
 class Tweets
 {
     /**
-     * The Embedly Object for retrieving the link information
+     * The Embed Object for retrieving the link information
      *
-     * @var \Embedly\Embedly
+     * @var \EmbedRocks\EmbedRocks
      * @access protected
      **/
-    protected $embedly;
+    protected $embed;
     /**
      * The Slugify Object for creating a slug from a string
      *
@@ -54,7 +54,7 @@ class Tweets
      * @var array
      * @access protected
      **/
-    protected $embedlyLinkData = array();
+    protected $embedLinkData = array();
     /**
      * An array of defaults that should be set on all arrays
      *
@@ -72,15 +72,15 @@ class Tweets
     /**
      * Construct the class
      *
-     * @param \Embedly\Embedly $embedlyObj The Embedly object for retrieving link information
-     * @param \Cocur\Slugify\Slugify $slugifyObj The Slugify object for turning strings into slugs
+     * @param \EmbedRocks\EmbedRocks $embedObj      The Embed object for retrieving link information
+     * @param \Cocur\Slugify\Slugify $slugifyObj    The Slugify object for turning strings into slugs
      * @return void
      * @access public
      * @author Johnathan Pulos
      **/
-    public function __construct($embedlyObj, $slugifyObj)
+    public function __construct($embedObj, $slugifyObj)
     {
-        $this->setEmbedlyObject($embedlyObj);
+        $this->setEmbedObject($embedObj);
         $this->setSlugifyObject($slugifyObj);
     }
     /**
@@ -98,18 +98,18 @@ class Tweets
     /**
      * Sets the $embedly class variable
      *
-     * @param \Embedly\Embedly $embedlyObj The Embedly object for retrieving link information
+     * @param \EmbedRocks\EmbedRocks $embedObj The Embed object for retrieving link information
      * @return void
      * @access protected
-     * @throws InvalidArgumentException if $embedlyObj is not a \Embedly\Embedly Object
+     * @throws InvalidArgumentException if $embedObj is not a \EmbedRocks\EmbedRocks Object
      * @author Johnathan Pulos
      **/
-    protected function setEmbedlyObject($embedlyObj)
+    protected function setEmbedObject($embedObj)
     {
-        if (is_a($embedlyObj, '\Embedly\Embedly')) {
-            $this->embedly = $embedlyObj;
+        if (is_a($embedObj, '\EmbedRocks\EmbedRocks')) {
+            $this->embed = $embedObj;
         } else {
-            throw new \InvalidArgumentException('$embedlyObj must be of the class \Embedly\Embedly.');
+            throw new \InvalidArgumentException('$embedObj must be of the class \EmbedRocks\EmbedRocks.');
         }
     }
     /**
@@ -139,7 +139,7 @@ class Tweets
      **/
     public function parseLinksFromAPI($response)
     {
-        $embedlyLinks = array();
+        $embedLinks = array();
         foreach ($response->statuses as $tweet) {
             $links = $tweet->entities->urls;
             $tweetedOn = new \DateTime($tweet->created_at);
@@ -158,12 +158,12 @@ class Tweets
                 );
                 $mergedLinkData = array_merge($linkData, $this->defaultLinkValues);
                 array_push($this->tweetedLinks, $mergedLinkData);
-                array_push($embedlyLinks, $mergedLinkData['link_url']);
+                array_push($embedLinks, $mergedLinkData['link_url']);
             }
         }
-        if (!empty($embedlyLinks)) {
-            $this->getEmbedlyData($embedlyLinks);
-            $this->combineLinksWithEmbedlyData();
+        if (!empty($embedLinks)) {
+            $this->getEmbedData($embedLinks);
+            $this->combineLinksWithEmbedData();
         }
         return $this->tweetedLinks;
     }
@@ -176,17 +176,12 @@ class Tweets
      * @access protected
      * @author Johnathan Pulos
      **/
-    protected function getEmbedlyData($links)
+    protected function getEmbedData($links)
     {
-        $chunks = array_chunk($links, $this->chunkSize);
-        $chunkCount = 1;
-        foreach ($chunks as $chunk) {
-            $data = $this->embedly->oembed(array('urls' =>  $chunk));
-            foreach ($data as $key => $linkData) {
-                $linkData->original_url = $chunk[$key];
-                array_push($this->embedlyLinkData, $linkData);
-            }
-            $chunkCount++;
+        foreach ($links as $key => $link) {
+            $embedData = $this->embed->get($link);
+            $embedData->original_url = $link;
+            array_push($this->embedLinkData, $embedData);
         }
     }
     /**
@@ -196,10 +191,10 @@ class Tweets
      * @access protected
      * @author Johnathan Pulos
      **/
-    protected function combineLinksWithEmbedlyData()
+    protected function combineLinksWithEmbedData()
     {
         foreach ($this->tweetedLinks as $linkKey => $link) {
-            foreach ($this->embedlyLinkData as $data) {
+            foreach ($this->embedLinkData as $data) {
                 /**
                  * We have the correct data for the link
                  */
@@ -226,21 +221,6 @@ class Tweets
                         $this->tweetedLinks[$linkKey]['link_embedly_html'] = $data->html;
                     } else {
                         $this->tweetedLinks[$linkKey]['link_embedly_html'] = '';
-                    }
-                    if ((property_exists($data, 'author_name')) && ($data->author_name != '')) {
-                        $this->tweetedLinks[$linkKey]['link_embedly_author'] = $data->author_name;
-                    } else {
-                        $this->tweetedLinks[$linkKey]['link_embedly_author'] = '';
-                    }
-                    if ((property_exists($data, 'author_url')) && ($data->author_url != '')) {
-                        $this->tweetedLinks[$linkKey]['link_embedly_author_link'] = $data->author_url;
-                    } else {
-                        $this->tweetedLinks[$linkKey]['link_embedly_author_link'] = '';
-                    }
-                    if ((property_exists($data, 'thumbnail_url')) && ($data->thumbnail_url != '')) {
-                        $this->tweetedLinks[$linkKey]['link_embedly_thumb_url'] = $data->thumbnail_url;
-                    } else {
-                        $this->tweetedLinks[$linkKey]['link_embedly_thumb_url'] = '';
                     }
                     if ((property_exists($data, 'type')) && ($data->type != '')) {
                         $this->tweetedLinks[$linkKey]['link_embedly_type'] = $data->type;

@@ -1,7 +1,7 @@
 # This file defines files that Git should ignore
 
 #
-# COMMON ELEMENTS 
+# COMMON ELEMENTS
 #
 
 # Windows image file caches
@@ -54,4 +54,4 @@ phpunit.xml
 Tests/Support/DatabaseSettings.php
 Config/DatabaseSettings.php
 Config/TwitterSettings.php
-Config/EmbedlySettings.php
+Config/EmbedRocksSettings.php

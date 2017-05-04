@@ -1,30 +1,31 @@
 <?php
 /**
  * This file is part of #MobMin Community.
- * 
+ *
  * #MobMin Community is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
- * Joshua Project API is distributed in the hope that it will be useful,
+ *
+ * #MobMin Community is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see 
+ * along with this program.  If not, see
  * <http://www.gnu.org/licenses/>.
  *
  * @author Johnathan Pulos <johnathan@missionaldigerati.org>
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
- * 
+ *
  */
 /**
  * Set the default date timezone
  *
  * @author Johnathan Pulos
  */
+set_time_limit(0);
 date_default_timezone_set('America/Los_Angeles');
  /**
   * This script pulls the latests tweets
@@ -46,10 +47,6 @@ $pliggCategory = 1;
  * SET THIS TO THE HASHTAG THAT YOU WANT TO PULL
  */
 $hashTagToSearch = '#MobMin';
-/**
- * SET THIS TO THE MAXIMUM NUMBER OF LINKS THAT CAN BE SENT TO EMBEDLY
- */
-$embedlyMaxLinks = 20;
 /**
  * Load up the Aura
  *
@@ -76,17 +73,23 @@ $loader->add("Config\DatabaseSettings", $rootDirectory);
  */
 $loader->add("Config\TwitterSettings", $rootDirectory);
 /**
- * Setup the Embedly settings object
+ * Setup the Embed Rocks settings object
  *
  * @author Johnathan Pulos
  */
-$loader->add("Config\EmbedlySettings", $rootDirectory);
+$loader->add("Config\EmbedRocksSettings", $rootDirectory);
 /**
  * Autoload the PDO Database Class
  *
  * @author Johnathan Pulos
  */
 $loader->add("PHPToolbox\PDODatabase\PDODatabaseConnect", $PHPToolboxDirectory);
+/**
+ * Autoload the cURL Utility
+ *
+ * @author Johnathan Pulos
+ */
+$loader->add("PHPToolbox\CachedRequest\CurlUtility", $PHPToolboxDirectory);
 /**
  * Autoload the Twitter OAuth
  *
@@ -95,10 +98,10 @@ $loader->add("PHPToolbox\PDODatabase\PDODatabaseConnect", $PHPToolboxDirectory);
 $loader->add("TwitterOAuth\TwitterOAuth", $vendorDirectory . "ricardoper" . $DS . "twitteroauth");
 $loader->add("TwitterOAuth\Exception\TwitterException", $vendorDirectory . "ricardoper" . $DS . "twitteroauth");
 /**
- * Autoload Embedly Library
+ * Autoload Embed Rocks Library
  */
-$loader->add("Embedly\Embedly", $vendorDirectory . "embedly" . $DS . "embedly-php" . $DS . "src");
-$embedlySettings = new \Config\EmbedlySettings();
+$loader->add("EmbedRocks\EmbedRocks", $libDirectory);
+$embedSettings = new \Config\EmbedRocksSettings();
 /**
  * Autoload the slugify library
  */
@@ -237,8 +240,8 @@ foreach ($response->statuses as $key => $tweet) {
 /**
  * Now intialize the parser, and have it prepare all the links for the database
  */
-$embedlyAPI = new \Embedly\Embedly(array('key'   =>  $embedlySettings->APIKey));
-$parser = new \Parsers\Tweets($embedlyAPI, $slugify);
+$embedAPI = new \EmbedRocks\EmbedRocks($embedSettings->APIKey, new \PHPToolbox\CachedRequest\CurlUtility());
+$parser = new \Parsers\Tweets($embedAPI, $slugify);
 $defaults =  array(
     'link_author'   =>  $pliggUserData[0]['user_id'],
     'link_status'   =>  'published',
@@ -276,7 +279,7 @@ foreach ($links as $link) {
 try {
     $tagCacheResource = new \Resources\TagCache($mysqlDatabase);
     $tagCacheResource->reset();
-    echo "The Tag Cache has been updated!\r\n";  
+    echo "The Tag Cache has been updated!\r\n";
 }  catch (Exception $e) {
     echo "There was a problem updating the Tag Cache!\r\n";
     echo "Error: " . $e->getMessage() . "\r\n";
