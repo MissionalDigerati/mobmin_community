@@ -24,8 +24,8 @@ When setting this up for production,  your document root should be the **Webroot
 
   1. Copy the file `/Config/DatabaseSettings.sample.php` to `/Config/DatabaseSettings.php`
   2. Open the `/Config/DatabaseSettings.php`, add your MySql settings, and save the file.  (You can leave the Postgre's Settings alone since they are not used in Production.)
-  3. Copy the file `/Config/EmbedlySettings.sample.php` to `/Config/EmbedlySettings.php`
-  4. Open the `/Config/EmbedlySettings.php`, add your [Embedly](http://embed.ly) API Key, and save the file.
+  3. Copy the file `/Config/EmbedRocksSettings.sample.php` to `/Config/EmbedRocksSettings.php`
+  4. Open the `/Config/EmbedRocksSettings.php`, add your [Embed Rocks](http://embed.rocks) API Key, and save the file.
   5. Copy the file `/Config/TwitterSettings.sample.php` to `/Config/TwitterSettings.php`
   6. Open the `/Config/TwitterSettings.php`, add your [Twitter](https://twitter.com) API credentials, and save the file.
   7. Copy the file `/Webroot/settings.php.default` to `/Webroot/settings.php`
